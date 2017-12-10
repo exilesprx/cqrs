@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Providers;
+namespace CQRS\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
