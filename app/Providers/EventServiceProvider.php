@@ -16,6 +16,12 @@ class EventServiceProvider extends ServiceProvider
         'CQRS\Events\Event' => [
             'CQRS\Listeners\EventListener',
         ],
+        'CQRS\Events\UserCreatedCommand' => [
+            'CQRS\Listeners\UserCreateCommandListener'
+        ],
+        'CQRS\Events\UserCreatedEvent' => [
+            'CQRS\Listeners\UserCreateEventListener'
+        ]
     ];
 
     /**

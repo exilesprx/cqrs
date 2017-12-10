@@ -177,6 +177,8 @@ return [
         CQRS\Providers\EventServiceProvider::class,
         CQRS\Providers\RouteServiceProvider::class,
 
+        Jenssegers\Mongodb\MongodbServiceProvider::class
+
     ],
 
     /*
