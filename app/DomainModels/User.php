@@ -73,6 +73,20 @@ class User implements IDomainModel
     }
 
     /**
+     * @param int $version
+     * @param array $payload
+     * @return User
+     */
+    public static function fromPayload(int $version, array $payload) {
+
+        $name = array_get($payload, 'name');
+        $email = array_get($payload, 'email');
+        $password = array_get($payload, 'password');
+
+        return new self($name, $email, $password, $version);
+    }
+
+    /**
      * @return string
      */
     public function getName(): string

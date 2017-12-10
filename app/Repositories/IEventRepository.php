@@ -8,13 +8,11 @@
 
 namespace CQRS\Repositories;
 
-use CQRS\DomainModels\User;
-
 /**
  * Class IEventRepository
  * @package CQRS\Repositories
  */
 interface IEventRepository
 {
-    public function save(User $user);
+    public function save(int $version, array $payload);
 }

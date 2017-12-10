@@ -3,14 +3,10 @@
 namespace CQRS\Events;
 
 use CQRS\DomainModels\User;
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Http\Request;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
 class UserCreatedCommand implements ICommand
 {
@@ -38,10 +34,23 @@ class UserCreatedCommand implements ICommand
         return new PrivateChannel('channel-name');
     }
 
-    /**
-     * @return User
-     */
-    public function getUser() {
-        return $this->user;
+    public function getName() {
+        return $this->user->getName();
+    }
+
+    public function getEmail() {
+        return $this->user->getEmail();
+    }
+
+    public function getPassword() {
+        return $this->user->getPassword();
+    }
+
+    public function getAggregateVersion() {
+        return $this->user->getAggregateVersion();
+    }
+
+    public function getRememberToken() {
+        return $this->user->getRememberToken();
     }
 }

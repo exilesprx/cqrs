@@ -4,8 +4,6 @@ namespace CQRS\Listeners;
 
 use CQRS\Events\UserCreatedCommand;
 use CQRS\Repositories\UserRepository;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
 class UserCreateCommandListener
 {
@@ -29,6 +27,11 @@ class UserCreateCommandListener
      */
     public function handle(UserCreatedCommand $event)
     {
-        $this->repo->save($event->getUser());
+        $this->repo->save($event->getAggregateVersion(), [
+            'name' => $event->getName(),
+            'email' => $event->getEmail(),
+            'password' => $event->getPassword(),
+            'remember_token' => $event->getRememberToken()
+        ]);
     }
 }

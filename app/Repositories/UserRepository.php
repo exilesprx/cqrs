@@ -8,12 +8,12 @@
 
 namespace CQRS\Repositories;
 
-
 use CQRS\DomainModels\User;
 use CQRS\Events\EventFactory;
 use CQRS\Events\UserCreatedEvent;
 use CQRS\EventStores\UserStore;
 use Illuminate\Events\Dispatcher;
+use CQRS\User as UserReadModel;
 
 class UserRepository implements IEventRepository
 {
@@ -28,20 +28,15 @@ class UserRepository implements IEventRepository
         $this->factory = $eventFactory;
     }
 
-    public function save(User $user)
+    public function save(int $version, iterable $payload)
     {
 
         UserStore::create([
-            'aggregate_version' => $user->getAggregateVersion(),
-            'data' => json_encode([
-                'name' => $user->getName(),
-                'email' => $user->getEmail(),
-                'password' => $user->getPassword(),
-                'remember_token' => $user->getRememberToken()
-            ])
+            'aggregate_version' => $version,
+            'data' => json_encode($payload)
         ]);
 
-        $event = $this->factory->make(UserCreatedEvent::class, $user);
+        $event = $this->factory->make(UserCreatedEvent::class, User::fromPayload($version, $payload));
 
         $this->dispatcher->dispatch($event);
 
@@ -51,7 +46,7 @@ class UserRepository implements IEventRepository
     public function all()
     {
 
-        return \CQRS\User::all();
+        return UserReadModel::all();
     }
 
     public function getVersion()

@@ -3,13 +3,11 @@
 namespace CQRS\Events;
 
 use CQRS\DomainModels\User;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+
 
 class UserCreatedEvent
 {
@@ -20,7 +18,7 @@ class UserCreatedEvent
     /**
      * Create a new event instance.
      *
-     * @return void
+     * @param User $user
      */
     public function __construct(User $user)
     {
@@ -37,11 +35,28 @@ class UserCreatedEvent
         return new PrivateChannel('channel-name');
     }
 
-    /**
-     * @return User
-     */
-    public function getUser()
+    public function getName()
     {
-        return $this->user;
+        return $this->user->getName();
+    }
+
+    public function getEmail()
+    {
+        return $this->user->getEmail();
+    }
+
+    public function getPassword()
+    {
+        return $this->user->getPassword();
+    }
+
+    public function getAggregateVersion()
+    {
+        return $this->user->getAggregateVersion();
+    }
+
+    public function getRememberToken()
+    {
+        return $this->user->getRememberToken();
     }
 }
