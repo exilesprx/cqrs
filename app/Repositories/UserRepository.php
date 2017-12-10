@@ -33,7 +33,7 @@ class UserRepository implements IEventRepository
 
         UserStore::create([
             'aggregate_version' => $version,
-            'data' => json_encode($payload)
+            'data' => $payload
         ]);
 
         $event = $this->factory->make(UserCreatedEvent::class, User::fromPayload($version, $payload));

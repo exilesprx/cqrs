@@ -9,13 +9,11 @@
 namespace CQRS\EventStores;
 
 
-use Illuminate\Database\Eloquent\Model;
-
 /**
  * Class UserStore
  * @package CQRS\EventStores
  */
-class UserStore extends Model
+class UserStore extends EventStore
 {
     /**
      * @var string

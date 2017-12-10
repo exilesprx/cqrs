@@ -9,7 +9,9 @@
 namespace CQRS\EventStores;
 
 
-class EventStore
+use Jenssegers\Mongodb\Eloquent\Model;
+
+class EventStore extends Model
 {
-    //    protected $connection = "mongodb";
+    protected $connection = "mongodb";
 }

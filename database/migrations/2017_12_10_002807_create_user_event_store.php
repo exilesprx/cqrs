@@ -13,7 +13,7 @@ class CreateUserEventStore extends Migration
      */
     public function up()
     {
-        Schema::create('user_events', function (Blueprint $table) {
+        Schema::connection('mongodb')->create('user_events', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('aggregate_version');
             $table->json('data');
