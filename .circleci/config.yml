@@ -24,8 +24,16 @@ jobs:
           command: "sudo apt-get update"
 
       - run:
-          name: Php Extensions
-          command: "sudo apt-get install -y php-mbstring php-xml php-mongodb"
+          name: Php MongoDB
+          command: "sudo docker-php-ext-install php-mongodb"
+
+      - run:
+          name: Php mbstring
+          command: "sudo docker-php-ext-install php-mbstring"
+
+      - run:
+          name: Php xml
+          command: "sudo docker-php-ext-install php-xml"
 
       # Download and cache dependencies
       - restore_cache:
