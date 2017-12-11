@@ -21,7 +21,7 @@ jobs:
 
       - run:
           name: Php Extensions
-          command: "apt-get install -y php-mbstring php-xml php-mongodb"
+          command: "sudo apt-get install -y php-mbstring php-xml php-mongodb"
 
       # Download and cache dependencies
       - restore_cache:
