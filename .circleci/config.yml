@@ -25,15 +25,15 @@ jobs:
 
       - run:
           name: Php MongoDB
-          command: "sudo docker-php-ext-install php-mongodb"
+          command: "sudo pecl install mongodb"
 
       - run:
           name: Php mbstring
-          command: "sudo docker-php-ext-install php-mbstring"
+          command: "sudo docker-php-ext-install mbstring"
 
       - run:
           name: Php xml
-          command: "sudo docker-php-ext-install php-xml"
+          command: "sudo docker-php-ext-install xml"
 
       # Download and cache dependencies
       - restore_cache:
