@@ -20,6 +20,10 @@ jobs:
       - checkout
 
       - run:
+          name: Update packages
+          command: "sudo apt-get update"
+
+      - run:
           name: Php Extensions
           command: "sudo apt-get install -y php-mbstring php-xml php-mongodb"
 
