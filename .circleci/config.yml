@@ -44,7 +44,7 @@ jobs:
 
       - run:
           name: Mongo ini file
-          command: "echo 'extension=mongodb.so' >> /usr/local/etc/php/conf.d/mongodb.ini"
+          command: "sudo echo 'extension=mongodb.so' >> /usr/local/etc/php/conf.d/mongodb.ini"
 
       # Download and cache dependencies
       - restore_cache:
