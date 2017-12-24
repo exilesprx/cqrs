@@ -34,6 +34,9 @@ jobs:
       - run:
           name: Php mbstring
           command: "sudo docker-php-ext-install mbstring"
+      - run:
+          name: Installing XML dependencies
+          command: "sudo apt-get install libxml2-dev"
 
       - run:
           name: Php xml
