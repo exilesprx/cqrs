@@ -32,8 +32,8 @@ jobs:
           command: "sudo pecl install mongodb"
 
       - run:
-          name: Php Mongo
-          command: "sudo apt-get install -y php-mongodb"
+          name: Enable mongodb docker extension
+          command: "sudo docker-php-ext-enable mongodb"
 
       - run:
           name: Php mbstring
