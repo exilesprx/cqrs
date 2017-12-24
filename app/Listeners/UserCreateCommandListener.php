@@ -2,36 +2,33 @@
 
 namespace CQRS\Listeners;
 
+use CQRS\Aggregates\User;
 use CQRS\Events\UserCreatedCommand;
-use CQRS\Repositories\UserRepository;
 
 class UserCreateCommandListener
 {
-    private $repo;
+    private $aggregate;
 
     /**
      * Create the event listener.
      *
-     * @param UserRepository $repository
+     * @param User $user
      */
-    public function __construct(UserRepository $repository)
+    public function __construct(User $user)
     {
-        $this->repo = $repository;
+        $this->aggregate = $user;
     }
 
     /**
      * Handle the event.
      *
-     * @param  UserCreatedCommand  $event
+     * @param  UserCreatedCommand $event
      * @return void
      */
     public function handle(UserCreatedCommand $event)
     {
-        $this->repo->save($event->getAggregateVersion(), [
-            'name' => $event->getName(),
-            'email' => $event->getEmail(),
-            'password' => $event->getPassword(),
-            'remember_token' => $event->getRememberToken()
-        ]);
+        $this->aggregate->applyNew($event->getName(), $event->getEmail(), $event->getPassword());
+
+        $this->aggregate->save();
     }
 }

@@ -8,49 +8,64 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 
+/**
+ * Class UserCreatedCommand
+ * @package CQRS\Events
+ */
 class UserCreatedCommand implements ICommand
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    private $user;
+    /**
+     * @var string
+     */
+    private $name;
 
     /**
-     * Create a new event instance.
-     *
-     * @param User $user
+     * @var string
      */
-    public function __construct(User $user)
+    private $email;
+
+    /**
+     * @var string
+     */
+    private $password;
+
+    /**
+     * @param string $name
+     * @param string $email
+     * @param string $password
+     */
+    public function handle(string $name, string $email, string $password)
     {
-        $this->user = $user;
+        $this->name = $name;
+
+        $this->email = $email;
+
+        $this->password = $password;
     }
 
     /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return \Illuminate\Broadcasting\Channel|array
+     * @return string
      */
-    public function broadcastOn()
+    public function getName()
     {
-        return new PrivateChannel('channel-name');
+        return $this->name;
     }
 
-    public function getName() {
-        return $this->user->getName();
+    /**
+     * @return string
+     */
+    public function getEmail()
+    {
+        return $this->email;
     }
 
-    public function getEmail() {
-        return $this->user->getEmail();
-    }
-
-    public function getPassword() {
-        return $this->user->getPassword();
-    }
-
-    public function getAggregateVersion() {
-        return $this->user->getAggregateVersion();
-    }
-
-    public function getRememberToken() {
-        return $this->user->getRememberToken();
+    /**
+     * @return string
+     */
+    public function getPassword()
+    {
+        return $this->password;
     }
 }

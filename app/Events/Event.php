@@ -10,6 +10,10 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
+/**
+ * Class Event
+ * @package CQRS\Events
+ */
 class Event
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;

@@ -2,10 +2,8 @@
 
 namespace CQRS\Http\Controllers;
 
-use CQRS\DomainModels\User;
-use CQRS\Repositories\UserRepository;
-use CQRS\Events\CommandFactory;
 use CQRS\Events\UserCreatedCommand;
+use CQRS\Repositories\State\UserRepository;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Http\Request;
 
@@ -13,15 +11,15 @@ class UserController extends Controller
 {
     private $dispatcher;
 
-    private $commandFactory;
+    private $command;
 
     private $repository;
 
-    public function __construct(Dispatcher $dispatcher, CommandFactory $commandFactory, UserRepository $userRepository)
+    public function __construct(Dispatcher $dispatcher, UserCreatedCommand $command, UserRepository $userRepository)
     {
         $this->dispatcher = $dispatcher;
 
-        $this->commandFactory = $commandFactory;
+        $this->command = $command;
 
         $this->repository = $userRepository;
     }
@@ -56,13 +54,32 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $user = User::fromRequest($request);
+        try {
+            $this->validate(
+                $request,
+                [
+                    'name' => ['required', 'string'],
+                    'email' => ['required', 'string'],
+                    'password' => ['required', 'string']
+                ]
+            );
 
-        $command = $this->commandFactory->make(UserCreatedCommand::class, $user);
+            $this->command->handle(
+                $request->get('name'),
+                $request->get('email'),
+                $request->get('password')
+            );
 
-        $this->dispatcher->dispatch($command);
+            $this->dispatcher->dispatch($this->command);
+        }
+        catch (\Exception $exception)
+        {
+            return response()->json([
+                'error' => $exception->getMessage()
+            ]);
+        }
 
-        return response()->json($user);
+        return response()->json();
     }
 
     /**

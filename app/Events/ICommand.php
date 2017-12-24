@@ -9,6 +9,10 @@
 namespace CQRS\Events;
 
 
+/**
+ * Interface ICommand
+ * @package CQRS\Events
+ */
 interface ICommand
 {
 

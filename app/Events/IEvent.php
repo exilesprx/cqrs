@@ -9,7 +9,14 @@
 namespace CQRS\Events;
 
 
+/**
+ * Interface IEvent
+ * @package CQRS\Events
+ */
 interface IEvent
 {
-
+    /**
+     * @return string
+     */
+    public function getShortName() : string;
 }

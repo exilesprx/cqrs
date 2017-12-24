@@ -3,17 +3,26 @@
 namespace CQRS\Listeners;
 
 use CQRS\Events\UserCreatedEvent;
-use CQRS\User;
+use CQRS\Repositories\State\UserRepository;
 
+/**
+ * Class UserCreateEventListener
+ * @package CQRS\Listeners
+ */
 class UserCreateEventListener
 {
     /**
-     * Create the event listener.
-     *
+     * @var UserRepository
      */
-    public function __construct()
+    private $repo;
+
+    /**
+     * Create the event listener.
+     * @param UserRepository $repository
+     */
+    public function __construct(UserRepository $repository)
     {
-        //
+        $this->repo = $repository;
     }
 
     /**
@@ -24,12 +33,6 @@ class UserCreateEventListener
      */
     public function handle(UserCreatedEvent $event)
     {
-        User::create([
-            'aggregate_version' => $event->getAggregateVersion() ? $event->getAggregateVersion() : 1,
-            'name' => $event->getName(),
-            'email' => $event->getEmail(),
-            'password' => $event->getPassword(),
-            'remember_token' => $event->getRememberToken()
-        ]);
+        $this->repo->save($event->getName(), $event->getEmail(), $event->getPassword());
     }
 }
