@@ -42,6 +42,10 @@ jobs:
           name: Php xml
           command: "sudo docker-php-ext-install xml"
 
+      - run:
+          name: Mongo ini file
+          command: "echo 'extension=mongodb.so' >> /usr/local/php/conf.d/mongodb.ini"
+
       # Download and cache dependencies
       - restore_cache:
           keys:
@@ -57,4 +61,4 @@ jobs:
           key: v1-dependencies-{{ checksum "composer.json" }}
 
       # run tests!
-      - run: ./vendor/bin/phpunit --testdox
+      - run: ./vendor/bin/phpspec run
