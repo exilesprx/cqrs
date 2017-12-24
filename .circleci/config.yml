@@ -32,6 +32,10 @@ jobs:
           command: "sudo pecl install mongodb"
 
       - run:
+          name: Php Mongo
+          command: "sudo apt-get install -y php-mongodb"
+
+      - run:
           name: Php mbstring
           command: "sudo docker-php-ext-install mbstring"
       - run:
@@ -41,10 +45,6 @@ jobs:
       - run:
           name: Php xml
           command: "sudo docker-php-ext-install xml"
-
-      - run:
-          name: Mongo ini file
-          command: "sudo echo 'extension=mongodb.so' >> /usr/local/etc/php/conf.d/mongodb.ini"
 
       # Download and cache dependencies
       - restore_cache:
