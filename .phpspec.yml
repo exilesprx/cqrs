@@ -2,5 +2,5 @@ suites:
   cqrs_suite:
     namespace: CQRS
     psr4_prefix: CQRS
-    source_path: app
-    spec_prefix: spec
+    src_path: app
+    spec_prefix: tests\Unit

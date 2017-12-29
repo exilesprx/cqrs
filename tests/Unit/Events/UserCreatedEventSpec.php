@@ -1,6 +1,6 @@
 <?php
 
-namespace spec\CQRS\Events;
+namespace tests\Unit\CQRS\Events;
 
 use CQRS\Events\UserCreatedEvent;
 use Faker\Factory;
