@@ -18,5 +18,5 @@ interface IEvent
     /**
      * @return string
      */
-    public function getShortName() : string;
+    public static function getShortName() : string;
 }

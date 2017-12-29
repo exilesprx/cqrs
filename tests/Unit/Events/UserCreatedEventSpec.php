@@ -55,6 +55,6 @@ class UserCreatedEventSpec extends ObjectBehavior
      */
     public function it_gets_event_name()
     {
-        $this->getShortName()->shouldBe(UserCreatedEvent::class);
+        $this->getShortName()->shouldBe(UserCreatedEvent::SHORT_NAME);
     }
 }

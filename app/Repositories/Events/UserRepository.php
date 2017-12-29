@@ -32,13 +32,14 @@ class UserRepository
     }
 
     /**
-     * @param User $user
+     * @param string $event
+     * @param iterable $payload
      */
-    public function save(User $user)
+    public function save(string $event, iterable $payload)
     {
         $this->store->save([
-            'event' => $user->getEvent(),
-            'data' => $user->toArray()
+            'event' => $event,
+            'data' => $payload
         ]);
     }
 

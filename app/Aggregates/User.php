@@ -9,6 +9,7 @@
 namespace CQRS\Aggregates;
 
 
+use CQRS\Events\EventFactory;
 use CQRS\Events\UserCreatedEvent;
 use CQRS\Repositories\Events\UserRepository as EventStoreRepo;
 use Illuminate\Events\Dispatcher;
@@ -25,9 +26,9 @@ class User
     private $repo;
 
     /**
-     * @var
+     * @var EventFactory
      */
-    private $event;
+    private $factory;
 
     /**
      * @var Dispatcher
@@ -35,102 +36,59 @@ class User
     private $dispatcher;
 
     /**
-     * @var
+     * @var \CQRS\DomainModels\User
      */
-    private $name;
-
-    /**
-     * @var
-     */
-    private $email;
-
-    /**
-     * @var
-     */
-    private $password;
+    private $user;
 
     /**
      * User constructor.
      * @param EventStoreRepo $repository
-     * @param UserCreatedEvent $event
+     * @param EventFactory $factory
      * @param Dispatcher $dispatcher
+     * @param \CQRS\DomainModels\User $user
      */
-    public function __construct(EventStoreRepo $repository, UserCreatedEvent $event, Dispatcher $dispatcher)
+    public function __construct(EventStoreRepo $repository, EventFactory $factory, Dispatcher $dispatcher, \CQRS\DomainModels\User $user)
     {
         $this->repo = $repository;
 
-        $this->event = $event;
+        $this->factory = $factory;
 
         $this->dispatcher = $dispatcher;
+
+        $this->user = $user;
     }
 
-    /**
-     * @param string $name
-     * @param string $email
-     * @param string $password
-     */
-    public function applyNew(string $name, string $email, string $password)
+    public function initialize(string $name, string $email, string $password, int $id = 0)
     {
-        $this->name = $name;
-
-        $this->email = $email;
-
-        $this->password = $password;
+        $this->user->initialize($id, $name, $email, $password);
     }
 
-    /**
-     *
-     */
-    public function save()
+    public function create()
     {
-        $this->repo->save($this);
+        $event = $this->factory->make(UserCreatedEvent::SHORT_NAME);
 
-        $this->event->handle($this->getName(), $this->getEmail(), $this->getPassword());
+        $this->repo->save(
+            $event->getShortName(),
+            [
+                'name' => $this->user->getName(),
+                'email' => $this->user->getEmail(),
+                'password' => $this->user->getPassword()
+            ]
+        );
 
-        $this->dispatcher->dispatch($this->event);
+        $event->handle($this->user->getName(), $this->user->getEmail(), $this->user->getPassword());
+
+        $this->dispatcher->dispatch($event);
     }
 
-    /**
-     * @return string
-     */
-    public function getEvent()
+    public function update(int $id, string $name, string $password)
     {
-        return $this->event->getShortName();
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getEmail()
-    {
-        return $this->email;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPassword()
-    {
-        return $this->password;
-    }
-
-    /**
-     * @return array
-     */
-    public function toArray()
-    {
-        return [
-            'name' => $this->getName(),
-            'email' => $this->getEmail(),
-            'password' => $this->getPassword(),
-        ];
+//        $this->repo->update($id, [
+//            'name' => $name,
+//            'password' => $password
+//        ]);
+//
+//        $event->handle();
+//        $this->dispatcher->dispatch($event);
     }
 }

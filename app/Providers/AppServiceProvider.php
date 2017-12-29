@@ -2,6 +2,7 @@
 
 namespace CQRS\Providers;
 
+use CQRS\Events\UserCreatedEvent;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,6 +24,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->bind(UserCreatedEvent::SHORT_NAME, UserCreatedEvent::class);
     }
 }

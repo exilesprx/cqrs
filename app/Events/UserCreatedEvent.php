@@ -18,6 +18,11 @@ class UserCreatedEvent implements IEvent
     /**
      * @var string
      */
+    public const SHORT_NAME = "user-create";
+
+    /**
+     * @var string
+     */
     private $name;
 
     /**
@@ -71,8 +76,8 @@ class UserCreatedEvent implements IEvent
     /**
      * @return string
      */
-    public function getShortName(): string
+    public static function getShortName() : string
     {
-        return self::class;
+        return self::SHORT_NAME;
     }
 }

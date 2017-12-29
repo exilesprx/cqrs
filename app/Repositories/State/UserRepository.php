@@ -38,6 +38,8 @@ class UserRepository
      */
     public function save(string $name, string $email, string $password)
     {
+        // Do some validation here
+
         $this->model->create([
             'name' => $name,
             'email' => $email,
