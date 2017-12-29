@@ -15,13 +15,12 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         'CQRS\Events\Event' => [
             'CQRS\Listeners\EventListener',
-        ],
-        'CQRS\Events\UserCreatedCommand' => [
-            'CQRS\Listeners\UserCreateCommandListener'
-        ],
-        'CQRS\Events\UserCreatedEvent' => [
-            'CQRS\Listeners\UserCreateEventListener'
         ]
+    ];
+
+    protected $subscribe = [
+        'CQRS\Listeners\UserCommandSubscriber',
+        'CQRS\Listeners\UserEventSubscriber'
     ];
 
     /**

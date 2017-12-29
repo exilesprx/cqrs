@@ -16,6 +16,8 @@ class UserCreatedCommand implements ICommand
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public const SHORT_NAME = "user-create-command";
+
     /**
      * @var string
      */
@@ -67,5 +69,13 @@ class UserCreatedCommand implements ICommand
     public function getPassword()
     {
         return $this->password;
+    }
+
+    /**
+     * @return string
+     */
+    public static function getShortName(): string
+    {
+        return self::SHORT_NAME;
     }
 }

@@ -15,5 +15,8 @@ namespace CQRS\Events;
  */
 interface ICommand
 {
-
+    /**
+     * @return string
+     */
+    public static function getShortName() : string;
 }

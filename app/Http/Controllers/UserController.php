@@ -2,24 +2,27 @@
 
 namespace CQRS\Http\Controllers;
 
+use CQRS\Events\CommandFactory;
 use CQRS\Events\UserCreatedCommand;
+use CQRS\Events\UserUpdatedCommand;
 use CQRS\Repositories\State\UserRepository;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Http\Request;
+use Illuminate\Http\ResponseTrait;
 
 class UserController extends Controller
 {
     private $dispatcher;
 
-    private $command;
+    private $factory;
 
     private $repository;
 
-    public function __construct(Dispatcher $dispatcher, UserCreatedCommand $command, UserRepository $userRepository)
+    public function __construct(Dispatcher $dispatcher, CommandFactory $factory, UserRepository $userRepository)
     {
         $this->dispatcher = $dispatcher;
 
-        $this->command = $command;
+        $this->factory = $factory;
 
         $this->repository = $userRepository;
     }
@@ -64,13 +67,11 @@ class UserController extends Controller
                 ]
             );
 
-            $this->command->handle(
-                $request->get('name'),
-                $request->get('email'),
-                $request->get('password')
-            );
+            $command = $this->factory->make(UserCreatedCommand::SHORT_NAME);
 
-            $this->dispatcher->dispatch($this->command);
+            $command->handle($request->all());
+
+            $this->dispatcher->dispatch($command);
         }
         catch (\Exception $exception)
         {
@@ -113,7 +114,29 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        try {
+            $this->validate(
+                $request,
+                [
+                    'name' => ['string'],
+                    'password' => ['string']
+                ]
+            );
+
+            $command = $this->factory->make(UserUpdatedCommand::SHORT_NAME);
+
+            $command->handle($request->all());
+
+            $this->dispatcher->dispatch($command);
+        }
+        catch (\Exception $exception)
+        {
+            return response()->json([
+                'error' => $exception->getMessage()
+            ]);
+        }
+
+        return response()->json();
     }
 
     /**

@@ -11,6 +11,7 @@ namespace CQRS\Aggregates;
 
 use CQRS\Events\EventFactory;
 use CQRS\Events\UserCreatedEvent;
+use CQRS\Events\UserUpdateEvent;
 use CQRS\Repositories\Events\UserRepository as EventStoreRepo;
 use Illuminate\Events\Dispatcher;
 
@@ -83,12 +84,18 @@ class User
 
     public function update(int $id, string $name, string $password)
     {
-//        $this->repo->update($id, [
-//            'name' => $name,
-//            'password' => $password
-//        ]);
-//
-//        $event->handle();
-//        $this->dispatcher->dispatch($event);
+        $event = $this->factory->make(UserUpdateEvent::SHORT_NAME);
+
+        $this->repo->update(
+            $id,
+            [
+                'name' => $name,
+                'password' => $password
+            ]
+        );
+
+        $event->handle($this->user->getId(), $this->user->getName(), $this->user->getPassword());
+
+        $this->dispatcher->dispatch($event);
     }
 }

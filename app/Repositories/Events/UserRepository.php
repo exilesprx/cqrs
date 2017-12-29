@@ -37,10 +37,22 @@ class UserRepository
      */
     public function save(string $event, iterable $payload)
     {
-        $this->store->save([
-            'event' => $event,
-            'data' => $payload
-        ]);
+        $this->store->save(
+            [
+                'event' => $event,
+                'data' => $payload
+            ]
+        );
+    }
+
+    public function update(string $event, iterable $payload)
+    {
+        $this->store->save(
+            [
+                'event' => $event,
+                'data' => $payload
+            ]
+        );
     }
 
     /**

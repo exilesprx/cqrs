@@ -49,11 +49,21 @@ class UserRepository
     }
 
     /**
+     * @param int $id
      * @param iterable $payload
      */
-    public function update(iterable $payload)
+    public function update(int $id, iterable $payload)
     {
-        $this->model->update($payload);
+        $this->model->find($id)->update($payload);
+    }
+
+    /**
+     * @param int $id
+     * @return UserReadModel
+     */
+    public function find(int $id)
+    {
+        return $this->model->find($id);
     }
 
     /**
