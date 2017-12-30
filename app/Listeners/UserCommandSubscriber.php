@@ -59,7 +59,13 @@ class UserCommandSubscriber
 
         $this->aggregate->initialize($user->name, $user->email, $user->password, $user->id);
 
-        $this->aggregate->update($user->id, $command->getName(), $command->getPassword());
+        $this->aggregate->update(
+            $user->id,
+            [
+                'name' => $command->getName(),
+                'password' => $command->getPassword()
+            ]
+        );
     }
 
     /**
@@ -69,12 +75,12 @@ class UserCommandSubscriber
     {
         $events->listen(
             UserCreatedCommand::class,
-            'onUserCreated'
+            self::class . '@onUserCreated'
         );
 
         $events->listen(
     UserUpdatedCommand::class,
-    'onUserUpdated'
+    self::class . '@onUserUpdate'
         );
     }
 }

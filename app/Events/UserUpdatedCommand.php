@@ -34,16 +34,15 @@ class UserUpdatedCommand implements ICommand
 
     /**
      * @param int $id
-     * @param string $name
-     * @param string $password
+     * @param iterable $payload
      */
-    public function handle(int $id, string $name, string $password)
+    public function handle(int $id, iterable $payload)
     {
         $this->id = $id;
 
-        $this->name = $name;
+        $this->name = array_get($payload, 'name');
 
-        $this->password = $password;
+        $this->password = array_get($payload, 'password');
     }
 
     /**

@@ -125,7 +125,7 @@ class UserController extends Controller
 
             $command = $this->factory->make(UserUpdatedCommand::SHORT_NAME);
 
-            $command->handle($request->all());
+            $command->handle($id, $request->all());
 
             $this->dispatcher->dispatch($command);
         }

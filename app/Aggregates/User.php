@@ -82,16 +82,13 @@ class User
         $this->dispatcher->dispatch($event);
     }
 
-    public function update(int $id, string $name, string $password)
+    public function update(int $id, iterable $payload)
     {
         $event = $this->factory->make(UserUpdateEvent::SHORT_NAME);
 
         $this->repo->update(
             $id,
-            [
-                'name' => $name,
-                'password' => $password
-            ]
+            $payload
         );
 
         $event->handle($this->user->getId(), $this->user->getName(), $this->user->getPassword());

@@ -34,17 +34,15 @@ class UserCreatedCommand implements ICommand
     private $password;
 
     /**
-     * @param string $name
-     * @param string $email
-     * @param string $password
+     * @param iterable $payload
      */
-    public function handle(string $name, string $email, string $password)
+    public function handle(iterable $payload)
     {
-        $this->name = $name;
+        $this->name = array_get($payload, 'name');
 
-        $this->email = $email;
+        $this->email = array_get($payload, 'email');
 
-        $this->password = $password;
+        $this->password = array_get($payload, 'password');
     }
 
     /**

@@ -43,12 +43,12 @@ class UserEventSubscriber
     {
         $events->listen(
             UserCreatedEvent::class,
-            'onCreateEvent'
+            self::class . '@onCreateEvent'
         );
 
         $events->listen(
             UserUpdateEvent::class,
-            'onUpdateEvent'
+            self::class . '@onUpdateEvent'
         );
     }
 }
