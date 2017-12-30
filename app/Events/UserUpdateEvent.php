@@ -20,27 +20,26 @@ class UserUpdateEvent extends Event implements IEvent
     private $id;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $name;
 
     /**
-     * @var string
+     * @var string|nul
      */
     private $password;
 
     /**
      * @param int $id
-     * @param string $name
-     * @param string $password
+     * @param iterable $payload
      */
-    public function handle(int $id, string $name, string $password)
+    public function handle(int $id, iterable $payload)
     {
         $this->id = $id;
 
-        $this->name = $name;
+        $this->name = array_get($payload, 'name');
 
-        $this->password = $password;
+        $this->password = array_get($payload, 'password');
     }
 
     /**
@@ -52,7 +51,7 @@ class UserUpdateEvent extends Event implements IEvent
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getName()
     {
@@ -60,7 +59,7 @@ class UserUpdateEvent extends Event implements IEvent
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getPassword()
     {

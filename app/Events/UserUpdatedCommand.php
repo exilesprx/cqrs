@@ -23,12 +23,12 @@ class UserUpdatedCommand implements ICommand
     private $id;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $name;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $password;
 
@@ -54,7 +54,7 @@ class UserUpdatedCommand implements ICommand
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getName()
     {
@@ -62,7 +62,7 @@ class UserUpdatedCommand implements ICommand
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getPassword()
     {

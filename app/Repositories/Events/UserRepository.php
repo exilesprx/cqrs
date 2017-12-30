@@ -47,6 +47,7 @@ class UserRepository
 
     public function update(string $event, iterable $payload)
     {
+        // TODO: Filter null values
         $this->store->save(
             [
                 'event' => $event,

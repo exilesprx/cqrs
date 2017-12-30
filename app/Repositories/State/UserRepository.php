@@ -54,6 +54,8 @@ class UserRepository
      */
     public function update(int $id, iterable $payload)
     {
+        // TODO: Filter null values
+
         $this->model->find($id)->update($payload);
     }
 

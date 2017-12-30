@@ -91,7 +91,10 @@ class User
             $payload
         );
 
-        $event->handle($this->user->getId(), $this->user->getName(), $this->user->getPassword());
+        $event->handle(
+            $this->user->getId(),
+            $payload
+        );
 
         $this->dispatcher->dispatch($event);
     }
