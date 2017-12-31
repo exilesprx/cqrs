@@ -9,15 +9,17 @@
 namespace CQRS\Events;
 
 
+use Ramsey\Uuid\UuidInterface;
+
 class UserUpdateEvent extends Event implements IEvent
 {
 
-    public const SHORT_NAME = "user-update";
+    const SHORT_NAME = "user-update";
 
     /**
-     * @var int
+     * @var UuidInterface
      */
-    private $id;
+    private $aggregateId;
 
     /**
      * @var string|null
@@ -25,17 +27,17 @@ class UserUpdateEvent extends Event implements IEvent
     private $name;
 
     /**
-     * @var string|nul
+     * @var string|null
      */
     private $password;
 
     /**
-     * @param int $id
+     * @param UuidInterface $aggregateId
      * @param iterable $payload
      */
-    public function handle(int $id, iterable $payload)
+    public function handle(UuidInterface $aggregateId, iterable $payload)
     {
-        $this->id = $id;
+        $this->aggregateId = $aggregateId;
 
         $this->name = array_get($payload, 'name');
 
@@ -43,11 +45,11 @@ class UserUpdateEvent extends Event implements IEvent
     }
 
     /**
-     * @return int
+     * @return UuidInterface
      */
-    public function getId() : int
+    public function getAggregateId() : UuidInterface
     {
-        return $this->id;
+        return $this->aggregateId;
     }
 
     /**

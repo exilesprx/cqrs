@@ -12,8 +12,11 @@ namespace CQRS\Listeners;
 use CQRS\Aggregates\User;
 use CQRS\Events\UserCreatedCommand;
 use CQRS\Events\UserUpdatedCommand;
-use CQRS\Repositories\State\UserRepository;
+use CQRS\Repositories\Events\UserRepository;
+use CQRS\Repositories\State\UserRepository as QueryRepository;
 use Illuminate\Events\Dispatcher;
+use Ramsey\Uuid\UuidFactory;
+use Ramsey\Uuid\UuidFactoryInterface;
 
 /**
  * Class UserCommandSubscriber
@@ -24,28 +27,47 @@ class UserCommandSubscriber
     /**
      * @var User
      */
-    public $aggregate;
+    private $aggregate;
 
     /**
      * @var UserRepository
      */
-    public $repo;
+    private $eventRepo;
+
+    /**
+     * @var QueryRepository
+     */
+    private $queryRepo;
+
+    /**
+     * @var UuidFactoryInterface
+     */
+    private $uuid;
 
     /**
      * UserCommandSubscriber constructor.
      * @param User $user
      * @param UserRepository $repository
+     * @param QueryRepository $userRepository
+     * @param UuidFactory $uuid
      */
-    public function __construct(User $user, UserRepository $repository)
+    public function __construct(User $user, UserRepository $repository, QueryRepository $userRepository, UuidFactory $uuid)
     {
         $this->aggregate = $user;
 
-        $this->repo = $repository;
+        $this->eventRepo = $repository;
+
+        $this->queryRepo = $userRepository;
+
+        $this->uuid = $uuid;
     }
 
+    /**
+     * @param UserCreatedCommand $command
+     */
     public function onUserCreated(UserCreatedCommand $command)
     {
-        $this->aggregate->initialize($command->getName(), $command->getEmail(), $command->getPassword());
+        $this->aggregate->initialize($this->uuid->uuid4(), $command->getName(), $command->getEmail(), $command->getPassword());
 
         $this->aggregate->create();
     }
@@ -55,12 +77,19 @@ class UserCommandSubscriber
      */
     public function onUserUpdate(UserUpdatedCommand $command)
     {
-        $user = $this->repo->find($command->getId());
+        $user = $this->queryRepo->find($command->getId());
 
-        $this->aggregate->initialize($user->name, $user->email, $user->password, $user->id);
+        $aggregateId = $user->aggregate_id;
+
+        $events = $this->eventRepo->find($aggregateId);
+
+        $events->each(function($event) use($aggregateId) {
+            $id = $this->uuid->fromString($aggregateId);
+
+            $this->aggregate->apply($id, $event->data);
+        });
 
         $this->aggregate->update(
-            $user->id,
             [
                 'name' => $command->getName(),
                 'password' => $command->getPassword()

@@ -20,5 +20,8 @@ class UserStore extends EventStore
      */
     protected $table = "user_events";
 
-    protected $fillable = ["aggregate_version", "data"];
+    /**
+     * @var array
+     */
+    protected $fillable = ["name", "aggregate_id", "data"];
 }

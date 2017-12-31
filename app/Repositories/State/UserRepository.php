@@ -8,7 +8,9 @@
 
 namespace CQRS\Repositories\State;
 
-use CQRS\User as UserReadModel;
+use CQRS\Repositories\PayloadHelper;
+use CQRS\User as UserQueryModel;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * Class UserRepository
@@ -18,25 +20,34 @@ class UserRepository
 {
 
     /**
-     * @var UserReadModel
+     * @var UserQueryModel
      */
     private $model;
 
     /**
-     * UserRepository constructor.
-     * @param UserReadModel $user
+     * @var PayloadHelper
      */
-    public function __construct(UserReadModel $user)
+    private $payloadHelper;
+
+    /**
+     * UserRepository constructor.
+     * @param UserQueryModel $user
+     * @param PayloadHelper $helper
+     */
+    public function __construct(UserQueryModel $user, PayloadHelper $helper)
     {
         $this->model = $user;
+
+        $this->payloadHelper = $helper;
     }
 
     /**
+     * @param UuidInterface $aggregateId
      * @param string $name
      * @param string $email
      * @param string $password
      */
-    public function save(string $name, string $email, string $password)
+    public function save(UuidInterface $aggregateId, string $name, string $email, string $password)
     {
         // Do some validation here
 
@@ -44,24 +55,33 @@ class UserRepository
             'name' => $name,
             'email' => $email,
             'password' => $password,
-            'aggregate_version' => 1
+            'aggregate_id' => $aggregateId->toString()
         ]);
     }
 
     /**
-     * @param int $id
+     * @param UuidInterface $aggregateId
      * @param iterable $payload
      */
-    public function update(int $id, iterable $payload)
+    public function update(UuidInterface $aggregateId, iterable $payload)
     {
-        // TODO: Filter null values
+        $payload = $this->payloadHelper->filterNullValues($payload);
 
-        $this->model->find($id)->update($payload);
+        $this->model->where('aggregate_id', $aggregateId->toString())->update($payload);
+    }
+
+    /**
+     * @param UuidInterface $aggregateId
+     * @return mixed
+     */
+    public function findByAggregateId(UuidInterface $aggregateId)
+    {
+        return $this->model->where('aggregate_id', $aggregateId)->first();
     }
 
     /**
      * @param int $id
-     * @return UserReadModel
+     * @return UserQueryModel
      */
     public function find(int $id)
     {

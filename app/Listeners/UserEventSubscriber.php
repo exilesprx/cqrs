@@ -14,24 +14,41 @@ use CQRS\Events\UserUpdateEvent;
 use CQRS\Repositories\State\UserRepository;
 use Illuminate\Events\Dispatcher;
 
+/**
+ * Class UserEventSubscriber
+ * @package CQRS\Listeners
+ */
 class UserEventSubscriber
 {
+    /**
+     * @var UserRepository
+     */
     private $repo;
 
+    /**
+     * UserEventSubscriber constructor.
+     * @param UserRepository $repo
+     */
     public function __construct(UserRepository $repo)
     {
         $this->repo = $repo;
     }
 
+    /**
+     * @param UserCreatedEvent $event
+     */
     public function onCreateEvent(UserCreatedEvent $event)
     {
-        $this->repo->save($event->getName(), $event->getEmail(), $event->getPassword());
+        $this->repo->save($event->getAggregateId(), $event->getName(), $event->getEmail(), $event->getPassword());
     }
 
+    /**
+     * @param UserUpdateEvent $event
+     */
     public function onUpdateEvent(UserUpdateEvent $event)
     {
         $this->repo->update(
-            $event->getId(),
+            $event->getAggregateId(),
             [
                 'name' => $event->getName(),
                 'password' => $event->getPassword()
@@ -39,6 +56,9 @@ class UserEventSubscriber
         );
     }
 
+    /**
+     * @param Dispatcher $events
+     */
     public function subscribe(Dispatcher $events)
     {
         $events->listen(

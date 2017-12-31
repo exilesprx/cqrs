@@ -8,8 +8,9 @@
 
 namespace CQRS\Repositories\Events;
 
-use CQRS\Aggregates\User;
 use CQRS\EventStores\UserStore;
+use CQRS\Repositories\PayloadHelper;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * Class UserRepository
@@ -23,52 +24,46 @@ class UserRepository
     private $store;
 
     /**
+     * @var PayloadHelper
+     */
+    private $payloadHelper;
+
+    /**
      * UserRepository constructor.
      * @param UserStore $store
+     * @param PayloadHelper $helper
      */
-    public function __construct(UserStore $store)
+    public function __construct(UserStore $store, PayloadHelper $helper)
     {
         $this->store = $store;
+
+        $this->payloadHelper = $helper;
     }
 
     /**
+     * @param UuidInterface $aggregateId
      * @param string $event
      * @param iterable $payload
      */
-    public function save(string $event, iterable $payload)
+    public function save(UuidInterface $aggregateId, string $event, iterable $payload)
     {
-        $this->store->save(
-            [
-                'event' => $event,
-                'data' => $payload
-            ]
-        );
-    }
+        $payload = $this->payloadHelper->filterNullValues($payload);
 
-    public function update(string $event, iterable $payload)
-    {
-        // TODO: Filter null values
-        $this->store->save(
+        $this->store->create(
             [
-                'event' => $event,
+                'name' => $event,
+                'aggregate_id' => $aggregateId->toString(),
                 'data' => $payload
             ]
         );
     }
 
     /**
-     *
+     * @param string $id
+     * @return UserStore
      */
-    public function all()
+    public function find(string $id)
     {
-        // TODO: Replay events
-    }
-
-    /**
-     *
-     */
-    public function get()
-    {
-
+        return $this->store->where('aggregate_id', $id)->orderBy('created_at', 'DESC')->get();
     }
 }

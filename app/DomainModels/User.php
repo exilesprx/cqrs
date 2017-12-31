@@ -18,6 +18,11 @@ class User
     /**
      * @var int
      */
+    const NON_EXISTENT_ID = 0;
+
+    /**
+     * @var int
+     */
     private $id;
 
     /**
@@ -43,14 +48,13 @@ class User
     }
 
     /**
-     * @param int $id
      * @param string $name
      * @param string $email
      * @param string $password
      */
-    public function initialize(int $id, string $name, string $email, string $password)
+    public function initialize(string $name, string $email, string $password)
     {
-        $this->id = $id;
+        $this->id = self::NON_EXISTENT_ID;
         $this->name = $name;
         $this->email = $email;
         $this->password = $password;
@@ -88,5 +92,35 @@ class User
         return $this->password;
     }
 
+    /**
+     * @param int $id
+     */
+    public function setId(int $id)
+    {
+        $this->id = $id;
+    }
 
+    /**
+     * @param string $name
+     */
+    public function setName(string $name)
+    {
+        $this->name = $name;
+    }
+
+    /**
+     * @param string $email
+     */
+    public function setEmail(string $email)
+    {
+        $this->email = $email;
+    }
+
+    /**
+     * @param string $password
+     */
+    public function setPassword(string $password)
+    {
+        $this->password = $password;
+    }
 }

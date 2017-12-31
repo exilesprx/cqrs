@@ -8,7 +8,6 @@ use CQRS\Events\UserUpdatedCommand;
 use CQRS\Repositories\State\UserRepository;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Http\Request;
-use Illuminate\Http\ResponseTrait;
 
 class UserController extends Controller
 {
@@ -34,7 +33,13 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = $this->repository->all();
+        try {
+            $users = $this->repository->all();
+        }
+        catch(\Exception $exception)
+        {
+            $t = $exception->getMessage();
+        }
 
         return response()->json($users);
     }

@@ -15,7 +15,7 @@ namespace CQRS\Events;
  */
 class UserUpdatedCommand implements ICommand
 {
-    public const SHORT_NAME = "user-update-command";
+    const SHORT_NAME = "user-update-command";
 
     /**
      * @var int

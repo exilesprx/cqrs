@@ -15,7 +15,7 @@ class CreateUserEventStore extends Migration
     {
         Schema::connection('mongodb')->create('user_events', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('aggregate_version');
+            $table->integer('name');
             $table->json('data');
             $table->timestamps();
         });
@@ -28,6 +28,6 @@ class CreateUserEventStore extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_events');
+        Schema::connection('mongodb')->dropIfExists('user_events');
     }
 }

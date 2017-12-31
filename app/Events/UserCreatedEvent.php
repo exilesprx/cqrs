@@ -5,6 +5,8 @@ namespace CQRS\Events;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 
 
 /**
@@ -18,7 +20,12 @@ class UserCreatedEvent implements IEvent
     /**
      * @var string
      */
-    public const SHORT_NAME = "user-create";
+    const SHORT_NAME = "user-create";
+
+    /**
+     * @var Uuid
+     */
+    private $aggregateId;
 
     /**
      * @var string
@@ -36,17 +43,28 @@ class UserCreatedEvent implements IEvent
     private $password;
 
     /**
+     * @param UuidInterface $aggregateId
      * @param string $name
      * @param string $email
      * @param string $password
      */
-    public function handle(string $name, string $email, string $password)
+    public function handle(UuidInterface $aggregateId, string $name, string $email, string $password)
     {
+        $this->aggregateId = $aggregateId;
+
         $this->name = $name;
 
         $this->email = $email;
 
         $this->password = $password;
+    }
+
+    /**
+     * @return Uuid
+     */
+    public function getAggregateId(): Uuid
+    {
+        return $this->aggregateId;
     }
 
     /**

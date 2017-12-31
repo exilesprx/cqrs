@@ -14,6 +14,7 @@ use CQRS\Events\UserCreatedEvent;
 use CQRS\Events\UserUpdateEvent;
 use CQRS\Repositories\Events\UserRepository as EventStoreRepo;
 use Illuminate\Events\Dispatcher;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * Class User
@@ -21,6 +22,11 @@ use Illuminate\Events\Dispatcher;
  */
 class User
 {
+    /**
+     * @var
+     */
+    private $aggregateId;
+
     /**
      * @var EventStoreRepo
      */
@@ -59,16 +65,28 @@ class User
         $this->user = $user;
     }
 
-    public function initialize(string $name, string $email, string $password, int $id = 0)
+    /**
+     * @param UuidInterface $aggregateId
+     * @param string $name
+     * @param string $email
+     * @param string $password
+     */
+    public function initialize(UuidInterface $aggregateId, string $name, string $email, string $password)
     {
-        $this->user->initialize($id, $name, $email, $password);
+        $this->user->initialize($name, $email, $password);
+
+        $this->aggregateId = $aggregateId;
     }
 
+    /**
+     *
+     */
     public function create()
     {
         $event = $this->factory->make(UserCreatedEvent::SHORT_NAME);
 
         $this->repo->save(
+            $this->getAggregateId(),
             $event->getShortName(),
             [
                 'name' => $this->user->getName(),
@@ -77,25 +95,58 @@ class User
             ]
         );
 
-        $event->handle($this->user->getName(), $this->user->getEmail(), $this->user->getPassword());
+        $event->handle($this->getAggregateId(), $this->user->getName(), $this->user->getEmail(), $this->user->getPassword(), $this->aggregateId);
 
         $this->dispatcher->dispatch($event);
     }
 
-    public function update(int $id, iterable $payload)
+    /**
+     * @return mixed
+     */
+    public function getAggregateId()
+    {
+        return $this->aggregateId;
+    }
+
+    /**
+     * @param iterable $payload
+     */
+    public function update(iterable $payload)
     {
         $event = $this->factory->make(UserUpdateEvent::SHORT_NAME);
 
-        $this->repo->update(
-            $id,
+        $this->repo->save(
+            $this->getAggregateId(),
+            $event->getShortName(),
             $payload
         );
 
         $event->handle(
-            $this->user->getId(),
+            $this->getAggregateId(),
             $payload
         );
 
         $this->dispatcher->dispatch($event);
+    }
+
+    /**
+     * @param UuidInterface $aggregateId
+     * @param iterable $payload
+     */
+    public function apply(UuidInterface $aggregateId, iterable $payload)
+    {
+        $this->aggregateId = $aggregateId;
+
+        if($name = array_get($payload, 'name')) {
+            $this->user->setName($name);
+        }
+
+        if($email = array_get($payload, 'email')) {
+            $this->user->setEmail($email);
+        }
+
+        if($password = array_get($payload, 'password')) {
+            $this->user->setPassword($password);
+        }
     }
 }
