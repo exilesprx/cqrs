@@ -15,6 +15,7 @@ use CQRS\Events\UserUpdateEvent;
 use CQRS\Repositories\Events\UserRepository as EventStoreRepo;
 use Illuminate\Events\Dispatcher;
 use Ramsey\Uuid\UuidInterface;
+use CQRS\DomainModels\User as UserDomainModel;
 
 /**
  * Class User
@@ -23,7 +24,7 @@ use Ramsey\Uuid\UuidInterface;
 class User
 {
     /**
-     * @var
+     * @var UuidInterface
      */
     private $aggregateId;
 
@@ -52,9 +53,9 @@ class User
      * @param EventStoreRepo $repository
      * @param EventFactory $factory
      * @param Dispatcher $dispatcher
-     * @param \CQRS\DomainModels\User $user
+     * @param UserDomainModel $user
      */
-    public function __construct(EventStoreRepo $repository, EventFactory $factory, Dispatcher $dispatcher, \CQRS\DomainModels\User $user)
+    public function __construct(EventStoreRepo $repository, EventFactory $factory, Dispatcher $dispatcher, UserDomainModel $user)
     {
         $this->repo = $repository;
 
@@ -66,46 +67,45 @@ class User
     }
 
     /**
-     * @param UuidInterface $aggregateId
+     * @param UuidInterface $uuid
      * @param string $name
      * @param string $email
      * @param string $password
      */
-    public function initialize(UuidInterface $aggregateId, string $name, string $email, string $password)
+    public function initialize(UuidInterface $uuid, string $name, string $email, string $password)
     {
-        $this->user->initialize($name, $email, $password);
+        $this->aggregateId = $uuid;
 
-        $this->aggregateId = $aggregateId;
+        $this->user->initialize($name, $email, $password);
     }
 
     /**
-     *
      */
     public function create()
     {
         $event = $this->factory->make(UserCreatedEvent::SHORT_NAME);
 
+        $uuid = $this->getAggregateId();
+        $name = $this->user->getName();
+        $email = $this->user->getEmail();
+        $password = $this->user->getPassword();
+        $eventName = $event->getShortName();
+
+        $payload = [
+            'name' => $name,
+            'email' => $email,
+            'password' => $password
+        ];
+
         $this->repo->save(
-            $this->getAggregateId(),
-            $event->getShortName(),
-            [
-                'name' => $this->user->getName(),
-                'email' => $this->user->getEmail(),
-                'password' => $this->user->getPassword()
-            ]
+            $uuid,
+            $eventName,
+            $payload
         );
 
-        $event->handle($this->getAggregateId(), $this->user->getName(), $this->user->getEmail(), $this->user->getPassword(), $this->aggregateId);
+        $event->handle($uuid, $payload);
 
         $this->dispatcher->dispatch($event);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getAggregateId()
-    {
-        return $this->aggregateId;
     }
 
     /**
@@ -113,16 +113,20 @@ class User
      */
     public function update(iterable $payload)
     {
+        $uuid = $this->getAggregateId();
+
         $event = $this->factory->make(UserUpdateEvent::SHORT_NAME);
 
+        $payload = array_merge($this->user->toArray(), $payload);
+
         $this->repo->save(
-            $this->getAggregateId(),
+            $uuid,
             $event->getShortName(),
             $payload
         );
 
         $event->handle(
-            $this->getAggregateId(),
+            $uuid,
             $payload
         );
 
@@ -130,12 +134,14 @@ class User
     }
 
     /**
-     * @param UuidInterface $aggregateId
+     * @param UuidInterface $uuid
      * @param iterable $payload
      */
-    public function apply(UuidInterface $aggregateId, iterable $payload)
+    public function apply(UuidInterface $uuid, iterable $payload)
     {
-        $this->aggregateId = $aggregateId;
+        if (!$this->aggregateId) {
+            $this->aggregateId = $uuid;
+        }
 
         if($name = array_get($payload, 'name')) {
             $this->user->setName($name);
@@ -148,5 +154,13 @@ class User
         if($password = array_get($payload, 'password')) {
             $this->user->setPassword($password);
         }
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAggregateId()
+    {
+        return $this->aggregateId;
     }
 }

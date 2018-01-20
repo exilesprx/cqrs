@@ -71,7 +71,7 @@ class UserUpdateEvent extends Event implements IEvent
     /**
      * @return string
      */
-    public static function getShortName(): string
+    public function getShortName(): string
     {
         return self::SHORT_NAME;
     }

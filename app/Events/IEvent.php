@@ -8,6 +8,8 @@
 
 namespace CQRS\Events;
 
+use Ramsey\Uuid\UuidInterface;
+
 
 /**
  * Interface IEvent
@@ -16,7 +18,14 @@ namespace CQRS\Events;
 interface IEvent
 {
     /**
+     * @param UuidInterface $uuid
+     * @param iterable $payload
+     * @return mixed
+     */
+    public function handle(UuidInterface $uuid, iterable $payload);
+
+    /**
      * @return string
      */
-    public static function getShortName() : string;
+    public function getShortName() : string;
 }

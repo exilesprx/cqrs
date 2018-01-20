@@ -59,11 +59,11 @@ class UserRepository
     }
 
     /**
-     * @param string $id
+     * @param UuidInterface $id
      * @return UserStore
      */
-    public function find(string $id)
+    public function find(UuidInterface $id)
     {
-        return $this->store->where('aggregate_id', $id)->orderBy('created_at', 'DESC')->get();
+        return $this->store->where('aggregate_id', $id->toString())->orderBy('created_at', 'DESC')->get();
     }
 }

@@ -44,19 +44,17 @@ class UserCreatedEvent implements IEvent
 
     /**
      * @param UuidInterface $aggregateId
-     * @param string $name
-     * @param string $email
-     * @param string $password
+     * @param iterable $payload
      */
-    public function handle(UuidInterface $aggregateId, string $name, string $email, string $password)
+    public function handle(UuidInterface $aggregateId, iterable $payload)
     {
         $this->aggregateId = $aggregateId;
 
-        $this->name = $name;
+        $this->name = array_get($payload, 'name');
 
-        $this->email = $email;
+        $this->email = array_get($payload, 'email');
 
-        $this->password = $password;
+        $this->password = array_get($payload, 'password');
     }
 
     /**
@@ -94,7 +92,7 @@ class UserCreatedEvent implements IEvent
     /**
      * @return string
      */
-    public static function getShortName() : string
+    public function getShortName() : string
     {
         return self::SHORT_NAME;
     }

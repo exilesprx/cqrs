@@ -72,6 +72,8 @@ class UserController extends Controller
                 ]
             );
 
+            // TODO: Update to use mediator
+            // TODO: Mediator to fire command based on data
             $command = $this->factory->make(UserCreatedCommand::SHORT_NAME);
 
             $command->handle($request->all());

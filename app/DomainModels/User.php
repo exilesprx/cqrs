@@ -123,4 +123,16 @@ class User
     {
         $this->password = $password;
     }
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        return [
+            'name' => $this->name,
+            'email' => $this->email,
+            'password' => $this->password
+        ];
+    }
 }

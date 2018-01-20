@@ -12,6 +12,7 @@ namespace CQRS\Listeners;
 use CQRS\Aggregates\User;
 use CQRS\Events\UserCreatedCommand;
 use CQRS\Events\UserUpdatedCommand;
+use CQRS\EventStores\EventStore;
 use CQRS\Repositories\Events\UserRepository;
 use CQRS\Repositories\State\UserRepository as QueryRepository;
 use Illuminate\Events\Dispatcher;
@@ -79,14 +80,15 @@ class UserCommandSubscriber
     {
         $user = $this->queryRepo->find($command->getId());
 
-        $aggregateId = $user->aggregate_id;
+        $aggregateId = $this->uuid->fromString($user->getAttribute('aggregate_id'));
 
         $events = $this->eventRepo->find($aggregateId);
 
-        $events->each(function($event) use($aggregateId) {
-            $id = $this->uuid->fromString($aggregateId);
+        $events->each(function(EventStore $event) use($aggregateId) {
 
-            $this->aggregate->apply($id, $event->data);
+            $data = $event->getAttribute('data');
+
+            $this->aggregate->apply($aggregateId, $data);
         });
 
         $this->aggregate->update(
