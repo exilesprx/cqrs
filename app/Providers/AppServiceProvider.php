@@ -2,9 +2,9 @@
 
 namespace CQRS\Providers;
 
-use CQRS\Events\UserCreatedCommand;
+use CQRS\Commands\UserCreatedCommand;
 use CQRS\Events\UserCreatedEvent;
-use CQRS\Events\UserUpdatedCommand;
+use CQRS\Commands\UserUpdatedCommand;
 use CQRS\Events\UserUpdateEvent;
 use Illuminate\Support\ServiceProvider;
 
