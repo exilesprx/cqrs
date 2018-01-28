@@ -3,6 +3,9 @@
 namespace CQRS\Events;
 
 use Illuminate\Broadcasting\Channel;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -14,9 +17,9 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
  * Class Event
  * @package CQRS\Events
  */
-class Event
+abstract class Event implements ShouldQueue
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable, SerializesModels, Queueable, InteractsWithQueue;
 
     /**
      * Create a new event instance.
@@ -26,15 +29,5 @@ class Event
     public function __construct()
     {
         //
-    }
-
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return \Illuminate\Broadcasting\Channel|array
-     */
-    public function broadcastOn()
-    {
-        return new PrivateChannel('channel-name');
     }
 }

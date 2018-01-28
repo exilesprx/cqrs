@@ -13,7 +13,6 @@ use Ramsey\Uuid\UuidInterface;
 
 class UserUpdateEvent extends Event implements IEvent
 {
-
     const SHORT_NAME = "user-update";
 
     /**

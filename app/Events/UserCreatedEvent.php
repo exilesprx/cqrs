@@ -13,10 +13,8 @@ use Ramsey\Uuid\UuidInterface;
  * Class UserCreatedEvent
  * @package CQRS\Events
  */
-class UserCreatedEvent implements IEvent
+class UserCreatedEvent extends Event implements IEvent
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
-
     /**
      * @var string
      */
