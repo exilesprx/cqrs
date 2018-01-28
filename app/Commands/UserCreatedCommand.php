@@ -1,6 +1,6 @@
 <?php
 
-namespace CQRS\Events;
+namespace CQRS\Commands;
 
 use CQRS\DomainModels\User;
 use Illuminate\Queue\SerializesModels;

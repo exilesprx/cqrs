@@ -6,7 +6,7 @@
  * Time: 8:23 PM
  */
 
-namespace CQRS\Events;
+namespace CQRS\Commands;
 
 
 /**

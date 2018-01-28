@@ -2,9 +2,9 @@
 
 namespace CQRS\Http\Controllers;
 
-use CQRS\Events\CommandFactory;
-use CQRS\Events\UserCreatedCommand;
-use CQRS\Events\UserUpdatedCommand;
+use CQRS\Commands\CommandFactory;
+use CQRS\Commands\UserCreatedCommand;
+use CQRS\Commands\UserUpdatedCommand;
 use CQRS\Repositories\State\UserRepository;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Http\Request;

@@ -1,9 +1,9 @@
 <?php
 
-namespace tests\Unit\CQRS\Events;
+namespace tests\Unit\CQRS\Commands;
 
-use CQRS\Events\CommandFactory;
-use CQRS\Events\UserCreatedCommand;
+use CQRS\Commands\CommandFactory;
+use CQRS\Commands\UserCreatedCommand;
 use Illuminate\Container\Container;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;

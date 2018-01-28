@@ -10,8 +10,8 @@ namespace CQRS\Listeners;
 
 
 use CQRS\Aggregates\User;
-use CQRS\Events\UserCreatedCommand;
-use CQRS\Events\UserUpdatedCommand;
+use CQRS\Commands\UserCreatedCommand;
+use CQRS\Commands\UserUpdatedCommand;
 use CQRS\EventStores\EventStore;
 use CQRS\Repositories\Events\UserRepository;
 use CQRS\Repositories\State\UserRepository as QueryRepository;

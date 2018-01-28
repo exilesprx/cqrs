@@ -6,7 +6,7 @@
  * Time: 6:20 PM
  */
 
-namespace CQRS\Events;
+namespace CQRS\Commands;
 
 
 use Illuminate\Container\Container;
