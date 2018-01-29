@@ -2,9 +2,7 @@
 
 namespace CQRS\Events;
 
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Broadcasting\InteractsWithSockets;
+use CQRS\Repositories\State\UserRepository;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
@@ -44,7 +42,7 @@ class UserCreatedEvent extends Event implements IEvent
      * @param UuidInterface $aggregateId
      * @param iterable $payload
      */
-    public function handle(UuidInterface $aggregateId, iterable $payload)
+    public function __construct($aggregateId, iterable $payload)
     {
         $this->aggregateId = $aggregateId;
 
@@ -53,6 +51,14 @@ class UserCreatedEvent extends Event implements IEvent
         $this->email = array_get($payload, 'email');
 
         $this->password = array_get($payload, 'password');
+    }
+
+    /**
+     * @param UserRepository $repo
+     */
+    public function handle(UserRepository $repo)
+    {
+        $repo->save($this->aggregateId, $this->name, $this->email, $this->password);
     }
 
     /**

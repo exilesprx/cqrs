@@ -2,9 +2,9 @@
 
 namespace CQRS\Commands;
 
-use CQRS\DomainModels\User;
+use CQRS\Repositories\State\UserRepository;
+use Exception;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 
@@ -34,7 +34,22 @@ class UserCreatedCommand implements ICommand
     private $password;
 
     /**
+     * @var UserRepository
+     */
+    private $repo;
+
+    /**
+     * UserCreatedCommand constructor.
+     * @param UserRepository $repository
+     */
+    public function __construct(UserRepository $repository)
+    {
+        $this->repo = $repository;
+    }
+
+    /**
      * @param iterable $payload
+     * @throws Exception
      */
     public function handle(iterable $payload)
     {
@@ -43,6 +58,18 @@ class UserCreatedCommand implements ICommand
         $this->email = array_get($payload, 'email');
 
         $this->password = array_get($payload, 'password');
+
+        $user = $this->repo->findBy(
+            [
+                'name' => $this->name,
+                'email' => $this->email
+            ]
+        );
+
+        if($user)
+        {
+            throw new Exception("User already exists.");
+        }
     }
 
     /**

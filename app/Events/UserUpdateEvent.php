@@ -10,6 +10,7 @@ namespace CQRS\Events;
 
 
 use Ramsey\Uuid\UuidInterface;
+use CQRS\Repositories\State\UserRepository;
 
 class UserUpdateEvent extends Event implements IEvent
 {
@@ -34,13 +35,27 @@ class UserUpdateEvent extends Event implements IEvent
      * @param UuidInterface $aggregateId
      * @param iterable $payload
      */
-    public function handle(UuidInterface $aggregateId, iterable $payload)
+    public function __construct($aggregateId, iterable $payload)
     {
         $this->aggregateId = $aggregateId;
 
         $this->name = array_get($payload, 'name');
 
         $this->password = array_get($payload, 'password');
+    }
+
+    /**
+     * @param UserRepository $repo
+     */
+    public function handle(UserRepository $repo)
+    {
+        $repo->update(
+            $this->aggregateId,
+            [
+                'name' => $this->name,
+                'password' => $this->password
+            ]
+        );
     }
 
     /**

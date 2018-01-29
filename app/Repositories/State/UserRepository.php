@@ -95,4 +95,13 @@ class UserRepository
     {
         return $this->model->all();
     }
+
+    /**
+     * @param iterable $conditions
+     * @return mixed
+     */
+    public function findBy(iterable $conditions)
+    {
+        return $this->model->where($conditions)->first();
+    }
 }

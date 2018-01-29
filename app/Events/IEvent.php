@@ -8,8 +8,6 @@
 
 namespace CQRS\Events;
 
-use Ramsey\Uuid\UuidInterface;
-
 
 /**
  * Interface IEvent
@@ -17,13 +15,6 @@ use Ramsey\Uuid\UuidInterface;
  */
 interface IEvent
 {
-    /**
-     * @param UuidInterface $uuid
-     * @param iterable $payload
-     * @return mixed
-     */
-    public function handle(UuidInterface $uuid, iterable $payload);
-
     /**
      * @return string
      */

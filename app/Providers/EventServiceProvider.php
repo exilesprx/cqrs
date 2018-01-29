@@ -19,8 +19,7 @@ class EventServiceProvider extends ServiceProvider
     ];
 
     protected $subscribe = [
-        'CQRS\Listeners\UserCommandSubscriber',
-        'CQRS\Listeners\UserEventSubscriber'
+        'CQRS\Listeners\UserCommandSubscriber'
     ];
 
     /**

@@ -35,9 +35,9 @@ class EventFactory
      * @param string $event
      * @return IEvent
      */
-    public function make(string $event)
+    public function make(string $event, $uuid, $payload)
     {
-        return $this->container->make($event);
+        return $this->container->make($event, ["aggregateId" => $uuid, "payload" => $payload]);
     }
 
 }

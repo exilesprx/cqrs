@@ -8,12 +8,11 @@
 
 namespace CQRS\Aggregates;
 
-
 use CQRS\Events\EventFactory;
 use CQRS\Events\UserCreatedEvent;
 use CQRS\Events\UserUpdateEvent;
 use CQRS\Repositories\Events\UserRepository as EventStoreRepo;
-use Illuminate\Events\Dispatcher;
+use Illuminate\Bus\Dispatcher;
 use Ramsey\Uuid\UuidInterface;
 use CQRS\DomainModels\User as UserDomainModel;
 
@@ -83,27 +82,23 @@ class User
      */
     public function create()
     {
-        $event = $this->factory->make(UserCreatedEvent::SHORT_NAME);
-
         $uuid = $this->getAggregateId();
-        $name = $this->user->getName();
-        $email = $this->user->getEmail();
-        $password = $this->user->getPassword();
-        $eventName = $event->getShortName();
 
         $payload = [
-            'name' => $name,
-            'email' => $email,
-            'password' => $password
+            'name' => $this->user->getName(),
+            'email' => $this->user->getEmail(),
+            'password' => $this->user->getPassword()
         ];
+
+        $event = $this->factory->make(UserCreatedEvent::SHORT_NAME, $uuid, $payload);
+
+        $eventName = $event->getShortName();
 
         $this->repo->save(
             $uuid,
             $eventName,
             $payload
         );
-
-        $event->handle($uuid, $payload);
 
         $this->dispatcher->dispatch($event);
     }
@@ -115,18 +110,13 @@ class User
     {
         $uuid = $this->getAggregateId();
 
-        $event = $this->factory->make(UserUpdateEvent::SHORT_NAME);
-
         $payload = array_merge($this->user->toArray(), $payload);
+
+        $event = $this->factory->make(UserUpdateEvent::SHORT_NAME, $uuid, $payload);
 
         $this->repo->save(
             $uuid,
             $event->getShortName(),
-            $payload
-        );
-
-        $event->handle(
-            $uuid,
             $payload
         );
 
