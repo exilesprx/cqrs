@@ -48,7 +48,7 @@ jobs:
 
       - run:
           name: Php pcntl
-          command: "docker-php-ext-install pcntl"
+          command: "sudo docker-php-ext-install pcntl"
 
       # Download and cache dependencies
       - restore_cache:
