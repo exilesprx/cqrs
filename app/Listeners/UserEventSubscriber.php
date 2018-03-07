@@ -5,18 +5,22 @@ namespace CQRS\Listeners;
 use CQRS\Events\UserCreated;
 use CQRS\Events\UserPasswordUpdated;
 use CQRS\Repositories\Events\UserRepository;
-use Illuminate\Events\Dispatcher;
 
 /**
  * Class UserEventSubscriber
  * @package CQRS\Listeners
  */
-class UserEventSubscriber
+class UserEventSubscriber extends EventSubscriberRoot
 {
     /**
      * @var UserRepository
      */
     private $repo;
+
+    protected $subscribes = [
+        UserCreated::class,
+        UserPasswordUpdated::class
+    ];
 
     /**
      * EventListener constructor.
@@ -42,15 +46,5 @@ class UserEventSubscriber
     public function onUserPasswordUpdated(UserPasswordUpdated $event)
     {
         $this->repo->save(get_class($event), $event->getAggregateId(), $event->toArray());
-    }
-
-    /**
-     * @param Dispatcher $events
-     */
-    public function subscribe(Dispatcher $events)
-    {
-        $events->listen(UserCreated::class, self::class . "@onUserCreated");
-
-        $events->listen(UserPasswordUpdated::class, self::class . "@onUserPasswordUpdated");
     }
 }

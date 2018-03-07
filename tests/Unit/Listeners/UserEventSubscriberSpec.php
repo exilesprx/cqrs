@@ -5,15 +5,16 @@ namespace tests\Unit\CQRS\Listeners;
 use CQRS\Events\UserCreated;
 use CQRS\Events\UserPasswordUpdated;
 use CQRS\Listeners\UserEventSubscriber;
-use CQRS\Repositories\State\UserRepository;
+use CQRS\Repositories\Events\UserRepository;
 use Faker\Factory;
+use Illuminate\Events\Dispatcher;
 use PhpSpec\ObjectBehavior;
-use Prophecy\Argument;
 use Ramsey\Uuid\UuidFactory;
 
 class UserEventSubscriberSpec extends ObjectBehavior
 {
     private $faker;
+
     private $uid;
 
     public function __construct()
@@ -27,46 +28,57 @@ class UserEventSubscriberSpec extends ObjectBehavior
         $this->beConstructedWith($userRepository);
     }
 
-    function it_is_initializable()
+    public function it_is_initializable()
     {
         $this->shouldHaveType(UserEventSubscriber::class);
     }
 
-    public function it_should_call_save_on_repo(UserCreated $event, $userRepository)
+    public function it_handles_the_user_created_event(UserCreated $event, $userRepository)
     {
-        $aggregateId = $this->uid->uuid4();
-        $name = $this->faker->name();
-        $email = $this->faker->email();
-        $password = $this->faker->password();
+        $uuid = $this->uid->uuid4();
 
-        $event->getAggregateId()->willReturn($aggregateId);
-        $event->getName()->willReturn($name);
-        $event->getEmail()->willReturn($email);
-        $event->getPassword()->willReturn($password);
+        $event->getAggregateId()
+            ->willReturn($uuid);
 
-        $userRepository->save($aggregateId, $name, $email, $password)->shouldBeCalled();
+        $event->toArray()
+            ->willReturn([4]);
+
+        $userRepository->save(
+            get_class($event->getWrappedObject()),
+            $uuid,
+            [4]
+        )->shouldBeCalled();
 
         $this->onUserCreated($event);
     }
 
-//    public function it_should_call_update_on_repo(UserUpdateEvent $event, $userRepository)
-//    {
-//        $aggregateId = $this->uid->uuid4();
-//        $name = $this->faker->name();
-//        $password = $this->faker->password();
-//
-//        $event->getAggregateId()->willReturn($aggregateId);
-//        $event->getName()->willReturn($name);
-//        $event->getPassword()->willReturn($password);
-//
-//        $userRepository->update(
-//            $aggregateId,
-//            [
-//                'name' => $name,
-//                'password' => $password
-//            ]
-//        )->shouldBeCalled();
-//
-//        $this->onUpdateEvent($event);
-//    }
+    public function it_handles_the_user_password_updated_event(UserPasswordUpdated $event, $userRepository)
+    {
+        $uuid = $this->uid->uuid4();
+
+        $event->getAggregateId()
+            ->willReturn($uuid);
+
+        $event->toArray()
+            ->willReturn([5]);
+
+        $userRepository->save(
+            get_class($event->getWrappedObject()),
+            $uuid,
+            [5]
+        )->shouldBeCalled();
+
+        $this->onUserPasswordUpdated($event);
+    }
+
+    public function it_subscribes_to_events(Dispatcher $dispatcher)
+    {
+        $dispatcher->listen(UserCreated::class, UserEventSubscriber::class . "@onUserCreated")
+            ->shouldBeCalled();
+
+        $dispatcher->listen(UserPasswordUpdated::class, UserEventSubscriber::class . "@onUserPasswordUpdated")
+            ->shouldBeCalled();
+
+        $this->subscribe($dispatcher);
+    }
 }

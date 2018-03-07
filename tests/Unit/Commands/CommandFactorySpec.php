@@ -6,7 +6,6 @@ use CQRS\Commands\CommandFactory;
 use CQRS\Commands\CreateUser;
 use Illuminate\Container\Container;
 use PhpSpec\ObjectBehavior;
-use Prophecy\Argument;
 
 class CommandFactorySpec extends ObjectBehavior
 {
@@ -22,9 +21,10 @@ class CommandFactorySpec extends ObjectBehavior
 
     public function it_calls_make_with_command_name($container)
     {
-        $command = CreateUser::SHORT_NAME;
+        $command = CreateUser::class;
 
-        $container->make($command, ["payload" => []])->shouldBeCalled();
+        $container->make($command, ["payload" => []])
+            ->shouldBeCalled();
 
         $this->make($command, []);
     }
