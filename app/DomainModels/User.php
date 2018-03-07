@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: andrew
- * Date: 12/29/17
- * Time: 5:02 PM
- */
 
 namespace CQRS\DomainModels;
 

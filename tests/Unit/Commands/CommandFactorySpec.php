@@ -3,7 +3,7 @@
 namespace tests\Unit\CQRS\Commands;
 
 use CQRS\Commands\CommandFactory;
-use CQRS\Commands\UserCreatedCommand;
+use CQRS\Commands\CreateUser;
 use Illuminate\Container\Container;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
@@ -22,10 +22,10 @@ class CommandFactorySpec extends ObjectBehavior
 
     public function it_calls_make_with_command_name($container)
     {
-        $command = UserCreatedCommand::SHORT_NAME;
+        $command = CreateUser::SHORT_NAME;
 
-        $container->make($command)->shouldBeCalled();
+        $container->make($command, ["payload" => []])->shouldBeCalled();
 
-        $this->make($command);
+        $this->make($command, []);
     }
 }

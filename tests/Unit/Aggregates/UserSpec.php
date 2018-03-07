@@ -4,13 +4,12 @@ namespace tests\Unit\CQRS\Aggregates;
 
 use CQRS\Aggregates\User;
 use CQRS\Events\EventFactory;
-use CQRS\Events\UserCreatedEvent;
-use CQRS\Events\UserUpdateEvent;
+use CQRS\Events\UserCreated;
+use CQRS\Events\UserPasswordUpdated;
 use CQRS\Repositories\Events\UserRepository as EventStore;
 use Faker\Factory;
-use Illuminate\Events\Dispatcher;
+use Illuminate\Bus\Dispatcher;
 use PhpSpec\ObjectBehavior;
-use Prophecy\Argument;
 use Ramsey\Uuid\UuidFactory;
 
 class UserSpec extends ObjectBehavior
@@ -48,7 +47,7 @@ class UserSpec extends ObjectBehavior
         $this->initialize($uuid, $name, $email, $password);
     }
 
-    public function it_creates_a_new_event(UserCreatedEvent $event, $eventStore, $factory, $dispatcher, $user)
+    public function it_creates_a_new_event(UserCreated $event, $eventStore, $factory, $dispatcher, $user)
     {
         $uuid = $this->uuid->uuid4();
         $name = $this->faker->name();
@@ -56,13 +55,9 @@ class UserSpec extends ObjectBehavior
         $password = $this->faker->password();
 
         $this->initialize($uuid, $name, $email, $password);
+
         $this->getAggregateId()->shouldReturn($uuid);
 
-        $eventName = UserCreatedEvent::SHORT_NAME;
-        $factory->make($eventName)->shouldBeCalled()->willReturn($event);
-
-
-        $event->getShortName()->willReturn($eventName);
         $user->getName()->willReturn($name);
         $user->getEmail()->willReturn($email);
         $user->getPassword()->willReturn($password);
@@ -73,16 +68,20 @@ class UserSpec extends ObjectBehavior
             'password' => $password
         ];
 
-        $eventStore->save($uuid, UserCreatedEvent::SHORT_NAME, $payload)->shouldBeCalled();
+        $event->getShortName()->willReturn(UserCreated::SHORT_NAME);
 
-        $event->handle($uuid, $payload)->shouldBeCalled();
+        $event->chain([new \CQRS\Broadcasts\BroadcastUserCreated($user->getWrappedObject())])->shouldBeCalled()->willReturn($event);
+
+//        $factory->make(UserCreated::SHORT_NAME, $uuid, $payload)->shouldBeCalled()->willReturn($event);
+
+        $eventStore->save($uuid, UserCreated::SHORT_NAME, $payload)->shouldBeCalled();
 
         $dispatcher->dispatch($event)->shouldBeCalled();
 
         $this->create();
     }
 
-    public function it_updates(UserUpdateEvent $event, $eventStore, $factory, $dispatcher, $user)
+    public function it_updates(UserPasswordUpdated $event, $eventStore, $factory, $dispatcher, $user)
     {
         $uuid = $this->uuid->uuid4();
         $name = $this->faker->name();
@@ -93,10 +92,6 @@ class UserSpec extends ObjectBehavior
 
         $this->initialize($uuid, $name, $email, $password);
         $this->getAggregateId()->shouldReturn($uuid);
-
-        $factory->make(UserUpdateEvent::SHORT_NAME)->shouldBeCalled()->willReturn($event);
-
-        $event->getShortName()->shouldBeCalled()->willReturn(UserUpdateEvent::SHORT_NAME);
 
         $updateData = [
             'name' => $updateName,
@@ -109,13 +104,15 @@ class UserSpec extends ObjectBehavior
             'password' => $password
         ];
 
+        $event->getShortName()->willReturn(UserPasswordUpdated::SHORT_NAME);
+
         $mergedData = array_merge($payload, $updateData);
+
+        $factory->make(UserPasswordUpdated::SHORT_NAME, $uuid, $mergedData)->shouldBeCalled()->willReturn($event);
 
         $user->toArray()->willReturn($payload);
 
-        $eventStore->save($uuid, UserUpdateEvent::SHORT_NAME, $mergedData)->shouldBeCalled();
-
-        $event->handle($uuid, $mergedData)->shouldBeCalled();
+        $eventStore->save($uuid, UserPasswordUpdated::SHORT_NAME, $mergedData)->shouldBeCalled();
 
         $dispatcher->dispatch($event)->shouldBeCalled();
 

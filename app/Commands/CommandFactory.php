@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: andrew
- * Date: 12/29/17
- * Time: 6:20 PM
- */
 
 namespace CQRS\Commands;
 
@@ -28,11 +22,12 @@ class CommandFactory
     }
 
     /**
-     * @param string $event
+     * @param string $command
+     * @param iterable $payload
      * @return ICommand
      */
-    public function make(string $event)
+    public function make(string $command, iterable $payload)
     {
-        return $this->container->make($event);
+        return $this->container->make($command, ["payload" => $payload]);
     }
 }

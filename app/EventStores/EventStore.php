@@ -1,17 +1,17 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: andrew
- * Date: 12/9/17
- * Time: 10:14 PM
- */
 
 namespace CQRS\EventStores;
 
-
 use Jenssegers\Mongodb\Eloquent\Model;
 
+/**
+ * Class EventStore
+ * @package CQRS\EventStores
+ */
 class EventStore extends Model
 {
+    /**
+     * @var string
+     */
     protected $connection = "mongodb";
 }

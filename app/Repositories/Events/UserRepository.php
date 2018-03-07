@@ -1,15 +1,10 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: andrew
- * Date: 12/9/17
- * Time: 8:47 PM
- */
 
 namespace CQRS\Repositories\Events;
 
 use CQRS\EventStores\UserStore;
 use CQRS\Repositories\PayloadHelper;
+use Illuminate\Support\Collection;
 use Ramsey\Uuid\UuidInterface;
 
 /**
@@ -41,29 +36,28 @@ class UserRepository
     }
 
     /**
-     * @param UuidInterface $aggregateId
      * @param string $event
-     * @param iterable $payload
+     * @param UuidInterface $aggregateId
+     * @param iterable $data
+     * @return bool
      */
-    public function save(UuidInterface $aggregateId, string $event, iterable $payload)
+    public function save(string $event, UuidInterface $aggregateId, iterable $data)
     {
-        $payload = $this->payloadHelper->filterNullValues($payload);
+        $this->store->name = $event;
 
-        $this->store->create(
-            [
-                'name' => $event,
-                'aggregate_id' => $aggregateId->toString(),
-                'data' => $payload
-            ]
-        );
+        $this->store->aggregate_id = $aggregateId->toString();
+
+        $this->store->data = $data;
+
+        return $this->store->save();
     }
 
     /**
      * @param UuidInterface $id
-     * @return UserStore
+     * @return Collection
      */
     public function find(UuidInterface $id)
     {
-        return $this->store->where('aggregate_id', $id->toString())->orderBy('created_at', 'DESC')->get();
+        return $this->store->where('aggregate_id', $id->toString())->get();
     }
 }

@@ -6,7 +6,6 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Foundation\Bus\Dispatchable;
 
 /**
  * Class Event
@@ -14,7 +13,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
  */
 abstract class Event implements IEvent, ShouldQueue
 {
-    use Dispatchable, SerializesModels, Queueable, InteractsWithQueue;
+    use SerializesModels, Queueable, InteractsWithQueue;
 
     /**
      * Create a new event instance.
@@ -24,13 +23,5 @@ abstract class Event implements IEvent, ShouldQueue
     public function __construct()
     {
         //
-    }
-
-    /**
-     * @return string
-     */
-    public function getShortName() : string
-    {
-        return static::SHORT_NAME;
     }
 }

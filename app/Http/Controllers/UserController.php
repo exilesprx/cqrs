@@ -3,8 +3,8 @@
 namespace CQRS\Http\Controllers;
 
 use CQRS\Commands\CommandFactory;
-use CQRS\Commands\UserCreatedCommand;
-use CQRS\Commands\UserUpdatedCommand;
+use CQRS\Commands\CreateUser;
+use CQRS\Commands\UpdateUserPassword;
 use CQRS\Repositories\State\UserRepository;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Http\Request;
@@ -74,9 +74,16 @@ class UserController extends Controller
 
             // TODO: Update to use mediator
             // TODO: Mediator to fire command based on data
-            $command = $this->factory->make(UserCreatedCommand::SHORT_NAME);
-
-            $command->handle($request->all());
+            $command = $this->factory->make(
+                CreateUser::class,
+                $request->only(
+                    [
+                        'name',
+                        'email',
+                        'password'
+                    ]
+                )
+            );
 
             $this->dispatcher->dispatch($command);
         }
@@ -130,9 +137,15 @@ class UserController extends Controller
                 ]
             );
 
-            $command = $this->factory->make(UserUpdatedCommand::SHORT_NAME);
-
-            $command->handle($id, $request->all());
+            if($request->exists('password')) {
+                $command = $this->factory->make(
+                    UpdateUserPassword::class,
+                    [
+                        'id' => $id,
+                        'password' => $request->get('password'),
+                    ]
+                );
+            }
 
             $this->dispatcher->dispatch($command);
         }

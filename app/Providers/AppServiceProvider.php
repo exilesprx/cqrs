@@ -2,11 +2,13 @@
 
 namespace CQRS\Providers;
 
-use CQRS\Commands\UserCreatedCommand;
-use CQRS\Events\UserCreatedEvent;
-use CQRS\Commands\UserUpdatedCommand;
-use CQRS\Events\UserUpdateEvent;
+use CQRS\Commands\CreateUser;
+use CQRS\Events\UserCreated;
+use CQRS\Commands\UpdateUserPassword;
+use CQRS\Events\UserPasswordUpdated;
 use Illuminate\Support\ServiceProvider;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,12 +29,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind(UserCreatedCommand::SHORT_NAME, UserCreatedCommand::class);
-
-        $this->app->bind(UserUpdatedCommand::SHORT_NAME, UserUpdatedCommand::class);
-
-        $this->app->bind(UserCreatedEvent::SHORT_NAME, UserCreatedEvent::class);
-
-        $this->app->bind(UserUpdateEvent::SHORT_NAME, UserUpdateEvent::class);
+        $this->app->bind(UuidInterface::class, function() {
+            return Uuid::uuid4();
+        });
     }
 }

@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: andrew
- * Date: 12/9/17
- * Time: 8:54 PM
- */
-
 namespace CQRS\EventStores;
 
 

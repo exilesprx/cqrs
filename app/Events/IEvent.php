@@ -1,13 +1,8 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: andrew
- * Date: 12/9/17
- * Time: 8:23 PM
- */
 
 namespace CQRS\Events;
 
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * Interface IEvent
@@ -16,7 +11,12 @@ namespace CQRS\Events;
 interface IEvent
 {
     /**
-     * @return string
+     * @return UuidInterface
      */
-    public function getShortName() : string;
+    public function getAggregateId();
+
+    /**
+     * @return array
+     */
+    public function toArray();
 }

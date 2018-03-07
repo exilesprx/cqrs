@@ -1,15 +1,9 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: andrew
- * Date: 12/29/17
- * Time: 5:19 PM
- */
 
 namespace CQRS\Events;
 
-
 use Illuminate\Container\Container;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * Class EventFactory
@@ -33,9 +27,11 @@ class EventFactory
 
     /**
      * @param string $event
+     * @param UuidInterface $uuid
+     * @param iterable $payload
      * @return IEvent
      */
-    public function make(string $event, $uuid, $payload)
+    public function make(string $event, UuidInterface $uuid, iterable $payload)
     {
         return $this->container->make($event, ["aggregateId" => $uuid, "payload" => $payload]);
     }

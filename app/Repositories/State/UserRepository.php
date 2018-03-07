@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: andrew
- * Date: 12/23/17
- * Time: 10:39 PM
- */
 
 namespace CQRS\Repositories\State;
 
@@ -46,28 +40,30 @@ class UserRepository
      * @param string $name
      * @param string $email
      * @param string $password
+     * @return int
      */
     public function save(UuidInterface $aggregateId, string $name, string $email, string $password)
     {
-        // Do some validation here
-
-        $this->model->create([
+        $user = $this->model->create([
             'name' => $name,
             'email' => $email,
             'password' => $password,
             'aggregate_id' => $aggregateId->toString()
         ]);
+
+        return $user->id;
     }
 
     /**
      * @param UuidInterface $aggregateId
      * @param iterable $payload
+     * @return int
      */
     public function update(UuidInterface $aggregateId, iterable $payload)
     {
         $payload = $this->payloadHelper->filterNullValues($payload);
 
-        $this->model->where('aggregate_id', $aggregateId->toString())->update($payload);
+        return $this->model->where('aggregate_id', $aggregateId->toString())->update($payload);
     }
 
     /**

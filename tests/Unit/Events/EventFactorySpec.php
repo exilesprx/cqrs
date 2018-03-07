@@ -3,7 +3,7 @@
 namespace tests\Unit\CQRS\Events;
 
 use CQRS\Events\EventFactory;
-use CQRS\Events\UserCreatedEvent;
+use CQRS\Events\UserCreated;
 use Illuminate\Container\Container;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
@@ -22,10 +22,10 @@ class EventFactorySpec extends ObjectBehavior
 
     public function it_calls_make_with_event_name($container)
     {
-        $event = UserCreatedEvent::SHORT_NAME;
+        $event = UserCreated::SHORT_NAME;
 
-        $container->make($event)->shouldBeCalled();
+        $container->make($event, ["aggregateId" => "id", "payload" => []])->shouldBeCalled();
 
-        $this->make($event);
+        $this->make($event, "id", []);
     }
 }

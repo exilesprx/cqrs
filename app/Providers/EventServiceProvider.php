@@ -2,7 +2,11 @@
 
 namespace CQRS\Providers;
 
-use Illuminate\Support\Facades\Event;
+use CQRS\Commands\CreateUser;
+use CQRS\Commands\UpdateUserPassword;
+use CQRS\Listeners\UpdateUserPasswordListener;
+use CQRS\Listeners\UserCreatedListener;
+use CQRS\Listeners\UserEventSubscriber;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -13,13 +17,16 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        'CQRS\Events\Event' => [
-            'CQRS\Listeners\EventListener',
+        CreateUser::class => [
+            UserCreatedListener::class
+        ],
+        UpdateUserPassword::class => [
+            UpdateUserPasswordListener::class
         ]
     ];
 
     protected $subscribe = [
-        'CQRS\Listeners\UserCommandSubscriber'
+        UserEventSubscriber::class
     ];
 
     /**

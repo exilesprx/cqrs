@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: andrew
- * Date: 12/30/17
- * Time: 2:27 PM
- */
 
 namespace CQRS\Repositories;
 

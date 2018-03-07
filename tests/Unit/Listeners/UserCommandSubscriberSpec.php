@@ -5,8 +5,8 @@ namespace tests\Unit\CQRS\Listeners;
 use CQRS\Aggregates\User;
 use CQRS\User as UserModel;
 use CQRS\EventStores\UserStore;
-use CQRS\Commands\UserCreatedCommand;
-use CQRS\Commands\UserUpdatedCommand;
+use CQRS\Commands\CreateUser;
+use CQRS\Commands\UpdateUserPassword;
 use CQRS\Listeners\UserCommandSubscriber;
 use CQRS\Repositories\Events\UserRepository;
 use CQRS\Repositories\State\UserRepository as QueryRepository;
@@ -36,7 +36,7 @@ class UserCommandSubscriberSpec extends ObjectBehavior
         $this->shouldHaveType(UserCommandSubscriber::class);
     }
 
-    public function it_should_call_create(UserCreatedCommand $command, $user, $uid)
+    public function it_should_call_create(CreateUser $command, $user, $uid)
     {
         $id = Uuid::uuid4();
         $name = $this->faker->name();
@@ -55,7 +55,7 @@ class UserCommandSubscriberSpec extends ObjectBehavior
         $this->onUserCreated($command);
     }
 
-    public function it_should_call_update(UserUpdatedCommand $command, UserModel $model, UserStore $store, $user, $repository, $queryRepo, $uid)
+    public function it_should_call_update(UpdateUserPassword $command, UserModel $model, UserStore $store, $user, $repository, $queryRepo, $uid)
     {
         $id = 1;
         $modelAggregateId = 2;
