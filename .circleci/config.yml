@@ -46,6 +46,10 @@ jobs:
           name: Php xml
           command: "sudo docker-php-ext-install xml"
 
+      - run:
+          name: Php pcntl
+          command: "docker-php-ext-install pcntl"
+
       # Download and cache dependencies
       - restore_cache:
           keys:
