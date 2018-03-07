@@ -66,14 +66,13 @@ class UserCreatedListener implements ShouldQueue
         // TODO: Basic validation here
 
         try {
-            // Initialize the aggregate.
-            $this->aggregate->initialize(
-                $this->uuid,
-                $command->toArray()
-            );
-
             // Attempt to save
-            $user = $this->aggregate->create();
+            $user = $this->aggregate->create(
+                $this->uuid,
+                $command->getName(),
+                $command->getEmail(),
+                $command->getPassword()
+            );
 
             // If saving of state was successful, fire off event
             $event = $this->factory->make(

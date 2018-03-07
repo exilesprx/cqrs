@@ -58,14 +58,8 @@ class UpdateUserPasswordListener implements ShouldQueue
         // TODO: Basic validation here
 
         try {
-            // Initialize the aggregate.
-            $this->aggregate->initialize(
-                $command->getId(),
-                $command->toArray()
-            );
-
             // Attempt to save
-            $user = $this->aggregate->updatePassword($command->getPassword());
+            $user = $this->aggregate->updatePassword($command->getId(), $command->getPassword());
 
             // If saving of state was successful, fire off event
             $event = $this->factory->make(

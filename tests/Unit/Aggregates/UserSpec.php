@@ -3,13 +3,14 @@
 namespace tests\Unit\CQRS\Aggregates;
 
 use CQRS\Aggregates\User;
+use CQRS\DomainModels\User as UserDomainModel;
 use CQRS\Events\EventFactory;
-use CQRS\Events\UserCreated;
-use CQRS\Events\UserPasswordUpdated;
-use CQRS\Repositories\Events\UserRepository as EventStore;
+use CQRS\Repositories\Events\UserRepository as EventRepo;
+use CQRS\Repositories\State\UserRepository as StateRepo;
 use Faker\Factory;
-use Illuminate\Bus\Dispatcher;
+use Illuminate\Events\Dispatcher;
 use PhpSpec\ObjectBehavior;
+use Prophecy\Argument;
 use Ramsey\Uuid\UuidFactory;
 
 class UserSpec extends ObjectBehavior
@@ -30,96 +31,12 @@ class UserSpec extends ObjectBehavior
         $this->shouldHaveType(User::class);
     }
 
-    public function let(EventStore $eventStore, EventFactory $factory, Dispatcher $dispatcher, \CQRS\DomainModels\User $user)
+    public function let(StateRepo $stateRepo, EventRepo $eventRepo, EventFactory $factory, Dispatcher $dispatcher, UserDomainModel $user)
     {
-        $this->beConstructedWith($eventStore, $factory, $dispatcher, $user);
+        $this->beConstructedWith($stateRepo, $eventRepo, $factory, $dispatcher, $user);
     }
 
-    public function it_initializes($user)
-    {
-        $uuid = $this->uuid->uuid4();
-        $name = $this->faker->name();
-        $email = $this->faker->email();
-        $password = $this->faker->password();
-
-        $user->initialize($name, $email, $password)->shouldBeCalled();
-
-        $this->initialize($uuid, $name, $email, $password);
-    }
-
-    public function it_creates_a_new_event(UserCreated $event, $eventStore, $factory, $dispatcher, $user)
-    {
-        $uuid = $this->uuid->uuid4();
-        $name = $this->faker->name();
-        $email = $this->faker->email();
-        $password = $this->faker->password();
-
-        $this->initialize($uuid, $name, $email, $password);
-
-        $this->getAggregateId()->shouldReturn($uuid);
-
-        $user->getName()->willReturn($name);
-        $user->getEmail()->willReturn($email);
-        $user->getPassword()->willReturn($password);
-
-        $payload = [
-            'name' => $name,
-            'email' => $email,
-            'password' => $password
-        ];
-
-        $event->getShortName()->willReturn(UserCreated::SHORT_NAME);
-
-        $event->chain([new \CQRS\Broadcasts\BroadcastUserCreated($user->getWrappedObject())])->shouldBeCalled()->willReturn($event);
-
-//        $factory->make(UserCreated::SHORT_NAME, $uuid, $payload)->shouldBeCalled()->willReturn($event);
-
-        $eventStore->save($uuid, UserCreated::SHORT_NAME, $payload)->shouldBeCalled();
-
-        $dispatcher->dispatch($event)->shouldBeCalled();
-
-        $this->create();
-    }
-
-    public function it_updates(UserPasswordUpdated $event, $eventStore, $factory, $dispatcher, $user)
-    {
-        $uuid = $this->uuid->uuid4();
-        $name = $this->faker->name();
-        $email = $this->faker->email();
-        $password = $this->faker->password();
-        $updateName = $this->faker->name();
-        $updateEmail = $this->faker->email();
-
-        $this->initialize($uuid, $name, $email, $password);
-        $this->getAggregateId()->shouldReturn($uuid);
-
-        $updateData = [
-            'name' => $updateName,
-            'email' => $updateEmail
-        ];
-
-        $payload = [
-            'name' => $name,
-            'email' => $email,
-            'password' => $password
-        ];
-
-        $event->getShortName()->willReturn(UserPasswordUpdated::SHORT_NAME);
-
-        $mergedData = array_merge($payload, $updateData);
-
-        $factory->make(UserPasswordUpdated::SHORT_NAME, $uuid, $mergedData)->shouldBeCalled()->willReturn($event);
-
-        $user->toArray()->willReturn($payload);
-
-        $eventStore->save($uuid, UserPasswordUpdated::SHORT_NAME, $mergedData)->shouldBeCalled();
-
-        $dispatcher->dispatch($event)->shouldBeCalled();
-
-        $this->update($updateData);
-    }
-
-    public function it_applies($user)
+    public function it_creates_a_new_user($stateRepo, $user)
     {
         $uuid = $this->uuid->uuid4();
         $name = $this->faker->name();
@@ -129,16 +46,39 @@ class UserSpec extends ObjectBehavior
         $user->setName($name)->shouldBeCalled();
         $user->setEmail($email)->shouldBeCalled();
         $user->setPassword($password)->shouldBeCalled();
+        $user->getName()->willReturn($name);
+        $user->getEmail()->willReturn($email);
+        $user->getPassword()->willReturn($password);
 
-        $this->apply(
+        $stateRepo->save($uuid, $name, $email, $password)
+            ->shouldBeCalled()
+            ->willReturn(1);
+
+        $user->setId(Argument::type('int'))->shouldBeCalled();
+
+        $this->create($uuid, $name, $email, $password);
+    }
+
+    public function it_updates_the_password($user, $eventRepo, $stateRepo)
+    {
+        $uuid = $this->uuid->uuid4();
+        $password = $this->faker->password();
+
+        $eventRepo->find($uuid)
+            ->shouldBeCalled()
+            ->willReturn(collect([]));
+
+        $user->setPassword($password)->shouldBeCalled();
+
+        $stateRepo->update(
             $uuid,
             [
-                'name' => $name,
-                'email' => $email,
                 'password' => $password
             ]
-        );
+        )->shouldBeCalled()->willReturn(1);
 
-        $this->getAggregateId()->shouldReturn($uuid);
+        $user->setId(Argument::type('int'))->shouldBeCalled();
+
+        $this->updatePassword($uuid, $password);
     }
 }
