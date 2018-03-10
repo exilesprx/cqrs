@@ -85,8 +85,7 @@ class UserCreatedListener implements ShouldQueue
 
             $this->dispatcher->dispatch(new BroadcastUserCreated($user));
         }
-        catch(Exception $exception)
-        {
+        catch(Exception $exception) {
             // Log maybe?
         }
     }

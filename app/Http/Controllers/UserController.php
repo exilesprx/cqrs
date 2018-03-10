@@ -36,8 +36,7 @@ class UserController extends Controller
         try {
             $users = $this->repository->all();
         }
-        catch(\Exception $exception)
-        {
+        catch(\Exception $exception) {
             $t = $exception->getMessage();
         }
 
@@ -57,7 +56,7 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -66,8 +65,8 @@ class UserController extends Controller
             $this->validate(
                 $request,
                 [
-                    'name' => ['required', 'string'],
-                    'email' => ['required', 'string'],
+                    'name'     => ['required', 'string'],
+                    'email'    => ['required', 'string'],
                     'password' => ['required', 'string']
                 ]
             );
@@ -87,11 +86,12 @@ class UserController extends Controller
 
             $this->dispatcher->dispatch($command);
         }
-        catch (\Exception $exception)
-        {
-            return response()->json([
-                'error' => $exception->getMessage()
-            ]);
+        catch(\Exception $exception) {
+            return response()->json(
+                [
+                    'error' => $exception->getMessage()
+                ]
+            );
         }
 
         return response()->json();
@@ -100,7 +100,7 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -111,7 +111,7 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -122,8 +122,8 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \Illuminate\Http\Request $request
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -132,7 +132,7 @@ class UserController extends Controller
             $this->validate(
                 $request,
                 [
-                    'name' => ['string'],
+                    'name'     => ['string'],
                     'password' => ['string']
                 ]
             );
@@ -141,7 +141,7 @@ class UserController extends Controller
                 $command = $this->factory->make(
                     UpdateUserPassword::class,
                     [
-                        'id' => $id,
+                        'id'       => $id,
                         'password' => $request->get('password'),
                     ]
                 );
@@ -149,11 +149,12 @@ class UserController extends Controller
 
             $this->dispatcher->dispatch($command);
         }
-        catch (\Exception $exception)
-        {
-            return response()->json([
-                'error' => $exception->getMessage()
-            ]);
+        catch(\Exception $exception) {
+            return response()->json(
+                [
+                    'error' => $exception->getMessage()
+                ]
+            );
         }
 
         return response()->json();
@@ -162,7 +163,7 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)

@@ -72,8 +72,7 @@ class UpdateUserPasswordListener implements ShouldQueue
 
             $this->dispatcher->dispatch(new BroadcastUserPasswordUpdated($user));
         }
-        catch(Exception $exception)
-        {
+        catch(Exception $exception) {
 //            Log::info($exception->getMessage());
         }
     }

@@ -59,21 +59,6 @@ class User extends AggregateRoot
 
     /**
      * @param UuidInterface $uuid
-     * @param iterable $payload
-     * @throws Exception
-     */
-    private function initialize(UuidInterface $uuid, iterable $payload)
-    {
-        $this->replay($uuid);
-
-        $this->apply(
-            $uuid,
-            $payload
-        );
-    }
-
-    /**
-     * @param UuidInterface $uuid
      * @param string $name
      * @param string $email
      * @param string $password
@@ -87,13 +72,16 @@ class User extends AggregateRoot
         $this->apply(
             $uuid,
             [
-                'name' => $name,
-                'email' => $email,
+                'name'     => $name,
+                'email'    => $email,
                 'password' => $password
             ]
         );
 
-        $id = $this->stateRepo->save($uuid, $this->user->getName(), $this->user->getEmail(), $this->user->getPassword());
+        $id = $this->stateRepo->save($uuid,
+            $this->user->getName(),
+            $this->user->getEmail(),
+            $this->user->getPassword());
 
         $this->user->setId($id);
 
@@ -138,8 +126,7 @@ class User extends AggregateRoot
             $this->aggregateId = $uuid;
         }
 
-        if($this->aggregateId && $this->aggregateId != $uuid)
-        {
+        if($this->aggregateId && $this->aggregateId != $uuid) {
             throw new Exception("Aggregate mismatch");
         }
 

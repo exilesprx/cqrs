@@ -29,8 +29,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind(UuidInterface::class, function() {
-            return Uuid::uuid4();
-        });
+        $this->app->bind(
+            UuidInterface::class,
+            function() {
+                return Uuid::uuid4();
+            }
+        );
     }
 }
