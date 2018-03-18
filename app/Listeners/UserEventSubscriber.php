@@ -37,7 +37,7 @@ class UserEventSubscriber extends EventSubscriberRoot
      */
     public function onUserCreated(UserCreated $event)
     {
-        $this->repo->save(get_class($event), $event->getAggregateId(), $event->toArray());
+        $this->repo->save(UserCreated::class, $event->getAggregateId(), $event->toArray());
     }
 
     /**
@@ -45,6 +45,6 @@ class UserEventSubscriber extends EventSubscriberRoot
      */
     public function onUserPasswordUpdated(UserPasswordUpdated $event)
     {
-        $this->repo->save(get_class($event), $event->getAggregateId(), $event->toArray());
+        $this->repo->save(UserPasswordUpdated::class, $event->getAggregateId(), $event->toArray());
     }
 }

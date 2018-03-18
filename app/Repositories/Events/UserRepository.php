@@ -3,7 +3,6 @@
 namespace CQRS\Repositories\Events;
 
 use CQRS\EventStores\UserStore;
-use CQRS\Repositories\PayloadHelper;
 use Illuminate\Support\Collection;
 use Ramsey\Uuid\UuidInterface;
 
@@ -19,35 +18,27 @@ class UserRepository
     private $store;
 
     /**
-     * @var PayloadHelper
-     */
-    private $payloadHelper;
-
-    /**
      * UserRepository constructor.
      * @param UserStore $store
-     * @param PayloadHelper $helper
      */
-    public function __construct(UserStore $store, PayloadHelper $helper)
+    public function __construct(UserStore $store)
     {
         $this->store = $store;
-
-        $this->payloadHelper = $helper;
     }
 
     /**
      * @param string $event
-     * @param UuidInterface $aggregateId
-     * @param iterable $data
+     * @param UuidInterface $uuid
+     * @param iterable $payload
      * @return bool
      */
-    public function save(string $event, UuidInterface $aggregateId, iterable $data)
+    public function save(string $event, UuidInterface $uuid, iterable $payload)
     {
         $this->store->name = $event;
 
-        $this->store->aggregate_id = $aggregateId->toString();
+        $this->store->aggregate_id = $uuid->toString();
 
-        $this->store->data = $data;
+        $this->store->data = $payload;
 
         return $this->store->save();
     }

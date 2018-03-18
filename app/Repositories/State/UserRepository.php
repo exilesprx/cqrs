@@ -2,7 +2,7 @@
 
 namespace CQRS\Repositories\State;
 
-use CQRS\Repositories\PayloadHelper;
+use CQRS\Aggregates\User;
 use CQRS\User as UserQueryModel;
 use Ramsey\Uuid\UuidInterface;
 
@@ -12,63 +12,47 @@ use Ramsey\Uuid\UuidInterface;
  */
 class UserRepository
 {
-
     /**
      * @var UserQueryModel
      */
     private $model;
 
     /**
-     * @var PayloadHelper
-     */
-    private $payloadHelper;
-
-    /**
      * UserRepository constructor.
      * @param UserQueryModel $user
-     * @param PayloadHelper $helper
      */
-    public function __construct(UserQueryModel $user, PayloadHelper $helper)
+    public function __construct(UserQueryModel $user)
     {
         $this->model = $user;
-
-        $this->payloadHelper = $helper;
     }
 
     /**
-     * @param UuidInterface $aggregateId
-     * @param string $name
-     * @param string $email
-     * @param string $password
+     * @param User $user
      * @return int
      */
-    public function save(UuidInterface $aggregateId, string $name, string $email, string $password)
+    public function save(User $user)
     {
-        $user = $this->model->create([
-            'name' => $name,
-            'email' => $email,
-            'password' => $password,
-            'aggregate_id' => $aggregateId->toString()
-        ]);
+        $payload = $this->createPayload($user);
 
-        return $user->id;
+        $user = $this->model->create($payload);
+
+        return $user;
     }
 
     /**
-     * @param UuidInterface $aggregateId
-     * @param iterable $payload
+     * @param User $user
      * @return int
      */
-    public function update(UuidInterface $aggregateId, iterable $payload)
+    public function update(User $user)
     {
-        $payload = $this->payloadHelper->filterNullValues($payload);
+        $payload = $this->createPayload($user);
 
-        return $this->model->where('aggregate_id', $aggregateId->toString())->update($payload);
+        return $this->model->where('aggregate_id', $user->getAggregateId())->update($payload);
     }
 
     /**
      * @param UuidInterface $aggregateId
-     * @return mixed
+     * @return
      */
     public function findByAggregateId(UuidInterface $aggregateId)
     {
@@ -77,7 +61,7 @@ class UserRepository
 
     /**
      * @param int $id
-     * @return UserQueryModel
+     * @return
      */
     public function find(int $id)
     {
@@ -85,7 +69,7 @@ class UserRepository
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function all()
     {
@@ -99,5 +83,15 @@ class UserRepository
     public function findBy(iterable $conditions)
     {
         return $this->model->where($conditions)->first();
+    }
+
+    private function createPayload(User $user)
+    {
+        return [
+            'aggregate_id' => $user->getAggregateId(),
+            'name' => $user->getName(),
+            'email' => $user->getEmail(),
+            'password' => $user->getPassword()
+        ];
     }
 }

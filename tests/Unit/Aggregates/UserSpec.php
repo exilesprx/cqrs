@@ -3,7 +3,7 @@
 namespace tests\Unit\CQRS\Aggregates;
 
 use CQRS\Aggregates\User;
-use CQRS\DomainModels\User as UserDomainModel;
+use CQRS\Entities\User as UserDomainModel;
 use CQRS\Events\EventFactory;
 use CQRS\Repositories\Events\UserRepository as EventRepo;
 use CQRS\Repositories\State\UserRepository as StateRepo;

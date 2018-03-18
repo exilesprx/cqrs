@@ -2,7 +2,7 @@
 
 namespace CQRS\Broadcasts;
 
-use CQRS\DomainModels\User;
+use CQRS\Entities\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Queue\SerializesModels;

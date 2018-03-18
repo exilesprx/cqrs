@@ -2,7 +2,7 @@
 
 namespace CQRS\Broadcasts;
 
-use CQRS\DomainModels\User;
+use CQRS\Aggregates\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Queue\SerializesModels;
@@ -43,7 +43,7 @@ class BroadcastUserCreated implements ShouldBroadcast
     public function broadcastWith()
     {
         return [
-            'id'       => $this->user->getId(),
+            'id'       => $this->user->getAggregateId(),
             'name'     => $this->user->getName(),
             'email'    => $this->user->getEmail()
         ];

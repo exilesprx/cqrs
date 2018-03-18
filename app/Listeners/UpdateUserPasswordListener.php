@@ -2,15 +2,14 @@
 
 namespace CQRS\Listeners;
 
-use CQRS\Aggregates\User as Aggregate;
+use CQRS\Aggregates\User;
 use CQRS\Broadcasts\BroadcastUserPasswordUpdated;
 use CQRS\Commands\UpdateUserPassword;
-use CQRS\Events\EventFactory;
-use CQRS\Events\UserPasswordUpdated;
+use CQRS\Repositories\State\UserRepository as StateRepository;
+use CQRS\Repositories\Events\UserRepository as EventRepository;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Events\Dispatcher;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Class UpdateUserPasswordListener
@@ -18,12 +17,10 @@ use Illuminate\Support\Facades\Log;
  */
 class UpdateUserPasswordListener implements ShouldQueue
 {
-    public $queue = "commands";
-
     /**
-     * @var EventFactory
+     * @var string
      */
-    private $factory;
+    public $queue = "commands";
 
     /**
      * @var Dispatcher
@@ -31,23 +28,36 @@ class UpdateUserPasswordListener implements ShouldQueue
     private $dispatcher;
 
     /**
-     * @var Aggregate
+     * @var User
      */
     private $aggregate;
 
     /**
-     * UserCommandSubscriber constructor.
-     * @param EventFactory $factory
-     * @param Dispatcher $dispatcher
-     * @param Aggregate $user
+     * @var StateRepository
      */
-    public function __construct(EventFactory $factory, Dispatcher $dispatcher, Aggregate $user)
-    {
-        $this->factory = $factory;
+    private $repo;
 
+    /**
+     * @var EventRepository
+     */
+    private $eventRepo;
+
+    /**
+     * UserCommandSubscriber constructor.
+     * @param Dispatcher $dispatcher
+     * @param User $aggregate
+     * @param StateRepository $repo
+     * @param EventRepository $eventRepo
+     */
+    public function __construct(Dispatcher $dispatcher, User $aggregate, StateRepository $repo, EventRepository $eventRepo)
+    {
         $this->dispatcher = $dispatcher;
 
-        $this->aggregate = $user;
+        $this->aggregate = $aggregate;
+
+        $this->repo = $repo;
+
+        $this->eventRepo = $eventRepo;
     }
 
     /**
@@ -58,19 +68,15 @@ class UpdateUserPasswordListener implements ShouldQueue
         // TODO: Basic validation here
 
         try {
-            // Attempt to save
-            $user = $this->aggregate->updatePassword($command->getId(), $command->getPassword());
+            $events = $this->eventRepo->find($command->getId());
 
-            // If saving of state was successful, fire off event
-            $event = $this->factory->make(
-                UserPasswordUpdated::class,
-                $command->getId(),
-                $command->toArray()
-            );
+            $this->aggregate->replayEvents($command->getId(), $events);
 
-            $this->dispatcher->dispatch($event);
+            $this->aggregate->updateUserPassword($command->getPassword());
 
-            $this->dispatcher->dispatch(new BroadcastUserPasswordUpdated($user));
+            $this->repo->update($this->aggregate);
+
+            $this->dispatcher->dispatch(new BroadcastUserPasswordUpdated($this->aggregate));
         }
         catch(Exception $exception) {
 //            Log::info($exception->getMessage());

@@ -5,7 +5,7 @@ namespace tests\Unit\CQRS\Listeners;
 use CQRS\Aggregates\User as Aggregate;
 use CQRS\Broadcasts\BroadcastUserCreated;
 use CQRS\Commands\CreateUser;
-use CQRS\DomainModels\User;
+use CQRS\Entities\User;
 use CQRS\Events\EventFactory;
 use CQRS\Events\UserCreated;
 use CQRS\Listeners\UserCreatedListener;

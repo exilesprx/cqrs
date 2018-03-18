@@ -5,7 +5,7 @@ namespace tests\Unit\CQRS\Listeners;
 use CQRS\Aggregates\User as Aggregate;
 use CQRS\Broadcasts\BroadcastUserPasswordUpdated;
 use CQRS\Commands\UpdateUserPassword;
-use CQRS\DomainModels\User;
+use CQRS\Entities\User;
 use CQRS\Events\EventFactory;
 use CQRS\Events\UserPasswordUpdated;
 use CQRS\Listeners\UpdateUserPasswordListener;

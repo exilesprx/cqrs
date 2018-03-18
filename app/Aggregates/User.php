@@ -2,12 +2,12 @@
 
 namespace CQRS\Aggregates;
 
-use CQRS\DomainModels\User as UserDomainModel;
 use CQRS\Events\EventFactory;
-use CQRS\Repositories\Events\UserRepository as EventRepo;
-use CQRS\Repositories\State\UserRepository as StateRepo;
-use Exception;
+use CQRS\Events\UserCreated;
+use CQRS\Events\UserPasswordUpdated;
+use Illuminate\Container\Container;
 use Illuminate\Events\Dispatcher;
+use Illuminate\Support\Collection;
 use Ramsey\Uuid\UuidInterface;
 
 /**
@@ -16,11 +16,6 @@ use Ramsey\Uuid\UuidInterface;
  */
 class User extends AggregateRoot
 {
-    /**
-     * @var StateRepo
-     */
-    private $stateRepo;
-
     /**
      * @var EventFactory
      */
@@ -32,29 +27,33 @@ class User extends AggregateRoot
     private $dispatcher;
 
     /**
-     * @var \CQRS\DomainModels\User
+     * @var string
      */
-    private $user;
+    private $name;
+
+    /**
+     * @var string
+     */
+    private $email;
+
+    /**
+     * @var string
+     */
+    private $password;
 
     /**
      * User constructor.
-     * @param StateRepo $stateRepo
-     * @param EventRepo $eventRepo
      * @param EventFactory $factory
      * @param Dispatcher $dispatcher
-     * @param UserDomainModel $user
+     * @param Container $container
      */
-    public function __construct(StateRepo $stateRepo, EventRepo $eventRepo, EventFactory $factory, Dispatcher $dispatcher, UserDomainModel $user)
+    public function __construct(EventFactory $factory, Dispatcher $dispatcher, Container $container)
     {
-        parent::__construct($eventRepo);
-
-        $this->stateRepo = $stateRepo;
+        parent::__construct($container);
 
         $this->factory = $factory;
 
         $this->dispatcher = $dispatcher;
-
-        $this->user = $user;
     }
 
     /**
@@ -62,14 +61,19 @@ class User extends AggregateRoot
      * @param string $name
      * @param string $email
      * @param string $password
-     * @return UserDomainModel
-     * @throws Exception
+     * @return void
      */
-    public function create(UuidInterface $uuid, string $name, string $email, string $password)
+    public function createUser(UuidInterface $uuid, string $name, string $email, string $password)
     {
         // TODO: Domain validation here
 
-        $this->apply(
+        $this->aggregateId = $uuid;
+        $this->name = $name;
+        $this->email = $email;
+        $this->password = $password;
+
+        $event = $this->factory->make(
+            UserCreated::class,
             $uuid,
             [
                 'name'     => $name,
@@ -78,68 +82,85 @@ class User extends AggregateRoot
             ]
         );
 
-        $id = $this->stateRepo->save($uuid,
-            $this->user->getName(),
-            $this->user->getEmail(),
-            $this->user->getPassword());
+        $this->onUserCreated($event);
 
-        $this->user->setId($id);
-
-        return $this->user;
+        $this->dispatcher->dispatch($event);
     }
 
     /**
-     * @param UuidInterface $uuid
      * @param string $password
-     * @return UserDomainModel
-     * @throws Exception
+     * @return void
      */
-    public function updatePassword(UuidInterface $uuid, string $password)
+    public function updateUserPassword(string $password)
     {
-        $payload = [
-            'password' => $password
-        ];
+        $this->password = $password;
 
-        $this->replayEvents(
-            $uuid,
-            $payload
+        $event = $this->factory->make(
+            UserPasswordUpdated::class,
+            $this->aggregateId,
+            [
+                'password' => $password
+            ]
         );
 
-        $id = $this->stateRepo->update(
-            $uuid,
-            $payload
-        );
+        $this->onUserPasswordUpdated($event);
 
-        $this->user->setId($id);
+        $this->dispatcher->dispatch($event);
+    }
 
-        return $this->user;
+    // TODO: these methods are called based on the Event Name
+
+    private function onUserCreated(UserCreated $event)
+    {
+        $this->aggregateId = $event->getAggregateId();
+        $this->name = $event->getName();
+        $this->email = $event->getEmail();
+        $this->password = $event->getPassword();
+    }
+
+//    private function onUserNameUpdated(UserNameUpdated $event)
+//    {
+//        $this->name = $event->getName();
+//    }
+
+    private function onUserPasswordUpdated(UserPasswordUpdated $event)
+    {
+        $this->password = $event->getPassword();
+    }
+
+    public function replayEvents(UuidInterface $uuid, Collection $events)
+    {
+        $this->aggregateId = $uuid;
+
+        $this->replay($events);
+    }
+
+    public function getAggregateId()
+    {
+        return $this->user->getId();
     }
 
     /**
-     * @param UuidInterface $uuid
-     * @param iterable $payload
-     * @throws \Exception
+     * @return string
      */
-    protected function apply(UuidInterface $uuid, iterable $payload)
+    public function getName(): string
     {
-        if(!$this->aggregateId) {
-            $this->aggregateId = $uuid;
-        }
+        return $this->name;
+    }
 
-        if($this->aggregateId && $this->aggregateId != $uuid) {
-            throw new Exception("Aggregate mismatch");
-        }
+    /**
+     * @return string
+     */
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
 
-        if($name = array_get($payload, 'name')) {
-            $this->user->setName($name);
-        }
-
-        if($email = array_get($payload, 'email')) {
-            $this->user->setEmail($email);
-        }
-
-        if($password = array_get($payload, 'password')) {
-            $this->user->setPassword($password);
-        }
+    /**
+     * @return string
+     */
+    public function getPassword(): string
+    {
+        return $this->password;
     }
 }

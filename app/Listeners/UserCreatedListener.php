@@ -2,15 +2,14 @@
 
 namespace CQRS\Listeners;
 
-use CQRS\Aggregates\User as Aggregate;
+use CQRS\Aggregates\User;
 use CQRS\Broadcasts\BroadcastUserCreated;
 use CQRS\Commands\CreateUser;
-use CQRS\Events\EventFactory;
-use CQRS\Events\UserCreated;
+use CQRS\Repositories\State\UserRepository as StateRepository;
 use Exception;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Ramsey\Uuid\UuidInterface;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class UserCreatedListener
@@ -21,41 +20,33 @@ class UserCreatedListener implements ShouldQueue
     public $queue = "commands";
 
     /**
-     * @var EventFactory
-     */
-    private $factory;
-
-    /**
      * @var Dispatcher
      */
     private $dispatcher;
 
     /**
-     * @var Aggregate
+     * @var User
      */
     private $aggregate;
 
     /**
-     * @var UuidInterface
+     * @var StateRepository
      */
-    private $uuid;
+    private $repo;
 
     /**
      * UserCommandSubscriber constructor.
-     * @param EventFactory $factory
      * @param Dispatcher $dispatcher
-     * @param UuidInterface $uuid
-     * @param Aggregate $user
+     * @param User $aggregate
+     * @param StateRepository $repo
      */
-    public function __construct(EventFactory $factory, Dispatcher $dispatcher, UuidInterface $uuid, Aggregate $user)
+    public function __construct(Dispatcher $dispatcher, User $aggregate, StateRepository $repo)
     {
-        $this->factory = $factory;
-
         $this->dispatcher = $dispatcher;
 
-        $this->aggregate = $user;
+        $this->aggregate = $aggregate;
 
-        $this->uuid = $uuid;
+        $this->repo = $repo;
     }
 
     /**
@@ -66,24 +57,16 @@ class UserCreatedListener implements ShouldQueue
         // TODO: Basic validation here
 
         try {
-            // Attempt to save
-            $user = $this->aggregate->create(
-                $this->uuid,
+            $this->aggregate->createUser(
+                Uuid::uuid4(),
                 $command->getName(),
                 $command->getEmail(),
                 $command->getPassword()
             );
 
-            // If saving of state was successful, fire off event
-            $event = $this->factory->make(
-                UserCreated::class,
-                $this->uuid,
-                $command->toArray()
-            );
+            $this->repo->save($this->aggregate);
 
-            $this->dispatcher->dispatch($event);
-
-            $this->dispatcher->dispatch(new BroadcastUserCreated($user));
+            $this->dispatcher->dispatch(new BroadcastUserCreated($this->aggregate));
         }
         catch(Exception $exception) {
             // Log maybe?

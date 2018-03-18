@@ -2,80 +2,66 @@
 
 namespace CQRS\Aggregates;
 
-use CQRS\EventStores\UserStore;
-use CQRS\Repositories\Events\UserRepository as EventRepo;
-use Exception;
-use Ramsey\Uuid\Uuid;
+use CQRS\Events\IEvent;
+use CQRS\EventStores\EventStore;
+use Illuminate\Container\Container;
+use Illuminate\Support\Collection;
 use Ramsey\Uuid\UuidInterface;
 
 abstract class AggregateRoot
 {
-    use Replayable;
-
-    /**
-     * @var UuidInterface
-     */
     protected $aggregateId;
 
-    /**
-     * @var EventRepo
-     */
-    protected $eventRepo;
+    protected $version;
 
-    /**
-     * AggregateRoot constructor.
-     * @param EventRepo $eventRepo
-     */
-    public function __construct(EventRepo $eventRepo)
+    protected $container;
+
+    protected function __construct(Container $container)
     {
-        $this->eventRepo = $eventRepo;
+        $this->version = 1;
+
+        $this->container = $container;
     }
 
-    /**
-     * @param UuidInterface $uuid
-     * @param iterable $payload
-     * @return mixed
-     */
-    abstract protected function apply(UuidInterface $uuid, iterable $payload);
+    public abstract function replayEvents(UuidInterface $uuid, Collection $events);
+
+    public abstract function getAggregateId();
 
     /**
      * This will replay the events on the aggregate.
-     * @param UuidInterface $uuid
-     * @throws Exception
+     * @param Collection $events
      */
-    protected function replay(UuidInterface $uuid)
+    protected function replay(Collection $events)
     {
-        $events = $this->eventRepo->find($uuid);
+        $events->each(function(EventStore $event) {
+            $this->version++;
 
-        $events->each(function(UserStore $event) use ($uuid)
-        {
-            if ($event->aggregate_id != $uuid)
-            {
-                return;
-            }
-
-            $this->apply(
-                Uuid::fromString($event->aggregate_id),
-                $event->data
+            $event = $this->container->makeWith(
+                $event->name,
+                [
+                    'uuid' => $event->aggregate_id,
+                    'payload' => $event->data
+                ]
             );
+
+            $this->apply($event);
         });
     }
 
     /**
-     * @param UuidInterface $uuid
+     * @param IEvent $event
+     * @throws \Exception
      */
-    protected function restore(UuidInterface $uuid)
+    protected function apply(IEvent $event)
     {
-//      $this->factory->make($event->name, $this->aggregateId, $event->data);
-//
-//      $this->dispatcher->dispatch($event);
-    }
+        $name = array_pop(explode('\\', get_class($event)));
 
-    /**
-     * @return mixed
-     */
-    protected function getAggregateId()
-    {
-        return $this->aggregateId;
+        $method = "on{$name}";
+
+        if(!method_exists($this, $method)) {
+            throw new \Exception();
+        }
+
+        $this->$method($event);
     }
 }

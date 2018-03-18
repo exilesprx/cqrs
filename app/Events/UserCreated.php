@@ -9,7 +9,7 @@ use Ramsey\Uuid\UuidInterface;
  * Class UserCreatedEvent
  * @package CQRS\Events
  */
-class UserCreated extends Event
+class UserCreated extends Event implements IEvent
 {
     private $aggregateId;
 
