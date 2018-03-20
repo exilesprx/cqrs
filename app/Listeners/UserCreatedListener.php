@@ -56,9 +56,10 @@ class UserCreatedListener implements ShouldQueue
     {
         // TODO: Basic validation here
 
-        try {
+        $id = Uuid::uuid4();
+//        try {
             $this->aggregate->createUser(
-                Uuid::uuid4(),
+                $id,
                 $command->getName(),
                 $command->getEmail(),
                 $command->getPassword()
@@ -66,10 +67,14 @@ class UserCreatedListener implements ShouldQueue
 
             $this->repo->save($this->aggregate);
 
-            $this->dispatcher->dispatch(new BroadcastUserCreated($this->aggregate));
-        }
-        catch(Exception $exception) {
+            $this->dispatcher->dispatch(new BroadcastUserCreated(
+                $id,
+                $command->getName(),
+                $command->getEmail()
+            ));
+//        }
+//        catch(Exception $exception) {
             // Log maybe?
-        }
+//        }
     }
 }

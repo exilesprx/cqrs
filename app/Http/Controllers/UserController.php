@@ -145,9 +145,9 @@ class UserController extends Controller
                         'password' => $request->get('password'),
                     ]
                 );
-            }
 
-            $this->dispatcher->dispatch($command);
+                $this->dispatcher->dispatch($command);
+            }
         }
         catch(\Exception $exception) {
             return response()->json(

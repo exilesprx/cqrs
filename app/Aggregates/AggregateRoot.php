@@ -2,20 +2,34 @@
 
 namespace CQRS\Aggregates;
 
-use CQRS\Events\IEvent;
-use CQRS\EventStores\EventStore;
 use Illuminate\Container\Container;
-use Illuminate\Support\Collection;
 use Ramsey\Uuid\UuidInterface;
 
+/**
+ * Class AggregateRoot
+ * @package CQRS\Aggregates
+ */
 abstract class AggregateRoot
 {
+    /**
+     * @var UuidInterface
+     */
     protected $aggregateId;
 
+    /**
+     * @var int
+     */
     protected $version;
 
+    /**
+     * @var Container
+     */
     protected $container;
 
+    /**
+     * AggregateRoot constructor.
+     * @param Container $container
+     */
     protected function __construct(Container $container)
     {
         $this->version = 1;
@@ -23,45 +37,11 @@ abstract class AggregateRoot
         $this->container = $container;
     }
 
-    public abstract function replayEvents(UuidInterface $uuid, Collection $events);
-
-    public abstract function getAggregateId();
-
     /**
-     * This will replay the events on the aggregate.
-     * @param Collection $events
+     * @return string
      */
-    protected function replay(Collection $events)
+    public function getAggregateId()
     {
-        $events->each(function(EventStore $event) {
-            $this->version++;
-
-            $event = $this->container->makeWith(
-                $event->name,
-                [
-                    'uuid' => $event->aggregate_id,
-                    'payload' => $event->data
-                ]
-            );
-
-            $this->apply($event);
-        });
-    }
-
-    /**
-     * @param IEvent $event
-     * @throws \Exception
-     */
-    protected function apply(IEvent $event)
-    {
-        $name = array_pop(explode('\\', get_class($event)));
-
-        $method = "on{$name}";
-
-        if(!method_exists($this, $method)) {
-            throw new \Exception();
-        }
-
-        $this->$method($event);
+        return $this->aggregateId->toString();
     }
 }

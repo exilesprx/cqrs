@@ -6,6 +6,7 @@ use CQRS\Aggregates\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Queue\SerializesModels;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * Class BroadcastUserCreated
@@ -17,15 +18,25 @@ class BroadcastUserCreated implements ShouldBroadcast
 
     public $broadcastQueue = 'broadcasts';
 
-    private $user;
+    private $id;
+
+    private $name;
+
+    private $email;
 
     /**
      * UserCreated constructor.
-     * @param User $user
+     * @param UuidInterface $id
+     * @param string $name
+     * @param string $email
      */
-    public function __construct(User $user)
+    public function __construct(UuidInterface $id, string $name, string $email)
     {
-        $this->user = $user;
+        $this->id = $id;
+
+        $this->name = $name;
+
+        $this->email = $email;
     }
     /**
      * Get the channels the event should broadcast on.
@@ -43,9 +54,9 @@ class BroadcastUserCreated implements ShouldBroadcast
     public function broadcastWith()
     {
         return [
-            'id'       => $this->user->getAggregateId(),
-            'name'     => $this->user->getName(),
-            'email'    => $this->user->getEmail()
+            'id'       => $this->id->toString(),
+            'name'     => $this->name,
+            'email'    => $this->email
         ];
     }
 }

@@ -8,14 +8,17 @@ use CQRS\Events\UserPasswordUpdated;
 use Illuminate\Container\Container;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Collection;
+use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
 /**
  * Class User
  * @package CQRS\Aggregates
  */
-class User extends AggregateRoot
+class User extends AggregateRoot implements EventSourceContract
 {
+    use EventSourced;
+
     /**
      * @var EventFactory
      */
@@ -132,12 +135,7 @@ class User extends AggregateRoot
     {
         $this->aggregateId = $uuid;
 
-        $this->replay($events);
-    }
-
-    public function getAggregateId()
-    {
-        return $this->user->getId();
+        self::replay($this, $events, $this->container, $this->version);
     }
 
     /**

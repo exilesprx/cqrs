@@ -67,19 +67,24 @@ class UpdateUserPasswordListener implements ShouldQueue
     {
         // TODO: Basic validation here
 
-        try {
+//        try {
             $events = $this->eventRepo->find($command->getId());
 
             $this->aggregate->replayEvents($command->getId(), $events);
 
             $this->aggregate->updateUserPassword($command->getPassword());
 
-            $this->repo->update($this->aggregate);
+            $this->repo->update(
+                $this->aggregate,
+                [
+                    'password' => $command->getPassword()
+                ]
+            );
 
-            $this->dispatcher->dispatch(new BroadcastUserPasswordUpdated($this->aggregate));
-        }
-        catch(Exception $exception) {
+            $this->dispatcher->dispatch(new BroadcastUserPasswordUpdated($command->getId()));
+//        }
+//        catch(Exception $exception) {
 //            Log::info($exception->getMessage());
-        }
+//        }
     }
 }

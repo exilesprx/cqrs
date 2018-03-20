@@ -32,7 +32,12 @@ class UserRepository
      */
     public function save(User $user)
     {
-        $payload = $this->createPayload($user);
+        $payload = [
+            'aggregate_id' => $user->getAggregateId(),
+            'name' => $user->getName(),
+            'email' => $user->getEmail(),
+            'password' => $user->getPassword()
+        ];
 
         $user = $this->model->create($payload);
 
@@ -41,12 +46,11 @@ class UserRepository
 
     /**
      * @param User $user
+     * @param iterable $payload
      * @return int
      */
-    public function update(User $user)
+    public function update(User $user, iterable $payload)
     {
-        $payload = $this->createPayload($user);
-
         return $this->model->where('aggregate_id', $user->getAggregateId())->update($payload);
     }
 
@@ -83,15 +87,5 @@ class UserRepository
     public function findBy(iterable $conditions)
     {
         return $this->model->where($conditions)->first();
-    }
-
-    private function createPayload(User $user)
-    {
-        return [
-            'aggregate_id' => $user->getAggregateId(),
-            'name' => $user->getName(),
-            'email' => $user->getEmail(),
-            'password' => $user->getPassword()
-        ];
     }
 }

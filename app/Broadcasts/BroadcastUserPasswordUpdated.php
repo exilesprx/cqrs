@@ -2,10 +2,11 @@
 
 namespace CQRS\Broadcasts;
 
-use CQRS\Entities\User;
+use CQRS\Aggregates\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Queue\SerializesModels;
+use Ramsey\Uuid\UuidInterface;
 
 class BroadcastUserPasswordUpdated implements ShouldBroadcast
 {
@@ -13,15 +14,15 @@ class BroadcastUserPasswordUpdated implements ShouldBroadcast
 
     public $broadcastQueue = 'broadcasts';
 
-    private $user;
+    private $id;
 
     /**
      * UserCreated constructor.
-     * @param User $user
+     * @param UuidInterface $uuid
      */
-    public function __construct(User $user)
+    public function __construct(UuidInterface $uuid)
     {
-        $this->user = $user;
+        $this->id = $uuid;
     }
     /**
      * Get the channels the event should broadcast on.
@@ -39,9 +40,7 @@ class BroadcastUserPasswordUpdated implements ShouldBroadcast
     public function broadcastWith()
     {
         return [
-            'id'       => $this->user->getId(),
-            'name'     => $this->user->getName(),
-            'email'    => $this->user->getEmail()
+            'id'       => $this->id->toString()
         ];
     }
 }
