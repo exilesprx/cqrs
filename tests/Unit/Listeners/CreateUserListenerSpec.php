@@ -8,14 +8,14 @@ use CQRS\Commands\CreateUser;
 use CQRS\Entities\User;
 use CQRS\Events\EventFactory;
 use CQRS\Events\UserCreated;
-use CQRS\Listeners\UserCreatedListener;
+use CQRS\Listeners\CreateUserListener;
 use Faker\Factory;
 use Illuminate\Contracts\Events\Dispatcher;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use Ramsey\Uuid\UuidInterface;
 
-class UserCreatedListenerSpec extends ObjectBehavior
+class CreateUserListenerSpec extends ObjectBehavior
 {
     private $faker;
 
@@ -31,7 +31,7 @@ class UserCreatedListenerSpec extends ObjectBehavior
 
     public function it_is_initializable()
     {
-        $this->shouldHaveType(UserCreatedListener::class);
+        $this->shouldHaveType(CreateUserListener::class);
     }
 
     public function it_handles_the_user_created_command(CreateUser $command, UserCreated $event, $factory, $dispatcher, $uuid, $aggregate)

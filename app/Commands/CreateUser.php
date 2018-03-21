@@ -6,9 +6,9 @@ use Illuminate\Queue\SerializesModels;
 
 /**
  * Class CreateUser
- * @package CQRS\Events
+ * @package CQRS\Commands
  */
-class CreateUser implements ICommand
+class CreateUser extends Command
 {
     use SerializesModels;
 

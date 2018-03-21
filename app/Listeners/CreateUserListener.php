@@ -3,7 +3,9 @@
 namespace CQRS\Listeners;
 
 use CQRS\Aggregates\User;
+use CQRS\Broadcasts\BroadcastFactory;
 use CQRS\Broadcasts\BroadcastUserCreated;
+use CQRS\Broadcasts\BroadcastUserError;
 use CQRS\Commands\CreateUser;
 use CQRS\Repositories\State\UserRepository as StateRepository;
 use Exception;
@@ -12,10 +14,10 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Ramsey\Uuid\Uuid;
 
 /**
- * Class UserCreatedListener
+ * Class CreateUserListener
  * @package CQRS\Listeners
  */
-class UserCreatedListener implements ShouldQueue
+class CreateUserListener implements ShouldQueue
 {
     public $queue = "commands";
 
@@ -35,18 +37,25 @@ class UserCreatedListener implements ShouldQueue
     private $repo;
 
     /**
+     * @var BroadcastFactory
+     */
+    private $factory;
+
+    /**
      * UserCommandSubscriber constructor.
      * @param Dispatcher $dispatcher
      * @param User $aggregate
      * @param StateRepository $repo
      */
-    public function __construct(Dispatcher $dispatcher, User $aggregate, StateRepository $repo)
+    public function __construct(Dispatcher $dispatcher, User $aggregate, StateRepository $repo, BroadcastFactory $factory)
     {
         $this->dispatcher = $dispatcher;
 
         $this->aggregate = $aggregate;
 
         $this->repo = $repo;
+
+        $this->factory = $factory;
     }
 
     /**
@@ -57,7 +66,8 @@ class UserCreatedListener implements ShouldQueue
         // TODO: Basic validation here
 
         $id = Uuid::uuid4();
-//        try {
+
+        try {
             $this->aggregate->createUser(
                 $id,
                 $command->getName(),
@@ -67,14 +77,24 @@ class UserCreatedListener implements ShouldQueue
 
             $this->repo->save($this->aggregate);
 
-            $this->dispatcher->dispatch(new BroadcastUserCreated(
-                $id,
-                $command->getName(),
-                $command->getEmail()
-            ));
-//        }
-//        catch(Exception $exception) {
-            // Log maybe?
-//        }
+            $broadcast = $this->factory->make(
+                BroadcastUserCreated::class,
+                [
+                    'id' => $id,
+                    'name' => $command->getName(),
+                    'email' => $command->getEmail()
+                ]
+            );
+        }
+        catch(Exception $exception) {
+            $broadcast = $this->factory->make(
+                BroadcastUserError::class,
+                [
+                    'message' => "Error creating user."
+                ]
+            );
+        }
+
+        $this->dispatcher->dispatch($broadcast);
     }
 }

@@ -3,10 +3,10 @@
 namespace CQRS\Commands;
 
 /**
- * Interface ICommand
- * @package CQRS\Events
+ * Interface CommandContract
+ * @package CQRS\Commands
  */
-interface ICommand
+interface CommandContract
 {
     /**
      * @return array

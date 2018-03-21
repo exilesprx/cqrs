@@ -5,12 +5,11 @@ namespace CQRS\Commands;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
-
 /**
  * Class UpdateUserPassword
- * @package CQRS\Events
+ * @package CQRS\Commands
  */
-class UpdateUserPassword implements ICommand
+class UpdateUserPassword extends Command
 {
     /**
      * @var iterable

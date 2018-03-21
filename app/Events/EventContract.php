@@ -5,10 +5,10 @@ namespace CQRS\Events;
 use Ramsey\Uuid\UuidInterface;
 
 /**
- * Interface IEvent
+ * Interface EventContract
  * @package CQRS\Events
  */
-interface IEvent
+interface EventContract
 {
     /**
      * @return UuidInterface

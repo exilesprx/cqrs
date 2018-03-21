@@ -4,7 +4,7 @@ namespace CQRS\Events;
 
 use Ramsey\Uuid\UuidInterface;
 
-class UserPasswordUpdated extends Event implements IEvent
+class UserPasswordUpdated extends Event implements EventContract
 {
     /**
      * @var UuidInterface

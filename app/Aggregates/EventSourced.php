@@ -4,7 +4,7 @@
 namespace CQRS\Aggregates;
 
 
-use CQRS\Events\IEvent;
+use CQRS\Events\EventContract;
 use CQRS\EventStores\EventStore;
 use Illuminate\Container\Container;
 use Illuminate\Support\Collection;
@@ -39,10 +39,10 @@ trait EventSourced
 
     /**
      * @param AggregateRoot $context
-     * @param IEvent $event
+     * @param EventContract $event
      * @throws \Exception
      */
-    protected static function apply(AggregateRoot $context, IEvent $event)
+    protected static function apply(AggregateRoot $context, EventContract $event)
     {
         $parts = explode('\\', get_class($event));
 

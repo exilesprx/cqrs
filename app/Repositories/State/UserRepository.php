@@ -33,7 +33,7 @@ class UserRepository
     public function save(User $user)
     {
         $payload = [
-            'aggregate_id' => $user->getAggregateId(),
+            'aggregate_id' => $user->getAggregateId()->toString(),
             'name' => $user->getName(),
             'email' => $user->getEmail(),
             'password' => $user->getPassword()
@@ -51,7 +51,7 @@ class UserRepository
      */
     public function update(User $user, iterable $payload)
     {
-        return $this->model->where('aggregate_id', $user->getAggregateId())->update($payload);
+        return $this->model->where('aggregate_id', $user->getAggregateId()->toString())->update($payload);
     }
 
     /**

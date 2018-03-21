@@ -29,7 +29,7 @@ class EventFactory
      * @param string $event
      * @param UuidInterface $uuid
      * @param iterable $payload
-     * @return IEvent
+     * @return EventContract
      */
     public function make(string $event, UuidInterface $uuid, iterable $payload)
     {

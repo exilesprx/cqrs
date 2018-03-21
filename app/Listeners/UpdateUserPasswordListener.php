@@ -3,6 +3,8 @@
 namespace CQRS\Listeners;
 
 use CQRS\Aggregates\User;
+use CQRS\Broadcasts\BroadcastFactory;
+use CQRS\Broadcasts\BroadcastUserError;
 use CQRS\Broadcasts\BroadcastUserPasswordUpdated;
 use CQRS\Commands\UpdateUserPassword;
 use CQRS\Repositories\State\UserRepository as StateRepository;
@@ -43,13 +45,18 @@ class UpdateUserPasswordListener implements ShouldQueue
     private $eventRepo;
 
     /**
+     * @var BroadcastFactory
+     */
+    private $factory;
+
+    /**
      * UserCommandSubscriber constructor.
      * @param Dispatcher $dispatcher
      * @param User $aggregate
      * @param StateRepository $repo
      * @param EventRepository $eventRepo
      */
-    public function __construct(Dispatcher $dispatcher, User $aggregate, StateRepository $repo, EventRepository $eventRepo)
+    public function __construct(Dispatcher $dispatcher, User $aggregate, StateRepository $repo, EventRepository $eventRepo, BroadcastFactory $factory)
     {
         $this->dispatcher = $dispatcher;
 
@@ -58,6 +65,8 @@ class UpdateUserPasswordListener implements ShouldQueue
         $this->repo = $repo;
 
         $this->eventRepo = $eventRepo;
+
+        $this->factory = $factory;
     }
 
     /**
@@ -67,7 +76,7 @@ class UpdateUserPasswordListener implements ShouldQueue
     {
         // TODO: Basic validation here
 
-//        try {
+        try {
             $events = $this->eventRepo->find($command->getId());
 
             $this->aggregate->replayEvents($command->getId(), $events);
@@ -81,10 +90,23 @@ class UpdateUserPasswordListener implements ShouldQueue
                 ]
             );
 
-            $this->dispatcher->dispatch(new BroadcastUserPasswordUpdated($command->getId()));
-//        }
-//        catch(Exception $exception) {
-//            Log::info($exception->getMessage());
-//        }
+            $broadcast = $this->factory->make(
+                BroadcastUserPasswordUpdated::class,
+                [
+                    'id' => $command->getId()
+                ]
+            );
+        }
+        catch(Exception $exception) {
+            $this->factory->make(
+                BroadcastUserError::class,
+                [
+                    'message' => "Error updating password",
+                    'id' => $command->getId()
+                ]
+            );
+        }
+
+        $this->dispatcher->dispatch($broadcast);
     }
 }

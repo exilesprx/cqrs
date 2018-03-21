@@ -9,8 +9,11 @@ use Ramsey\Uuid\UuidInterface;
  * Class UserCreatedEvent
  * @package CQRS\Events
  */
-class UserCreated extends Event implements IEvent
+class UserCreated extends Event implements EventContract
 {
+    /**
+     * @var UuidInterface
+     */
     private $aggregateId;
 
     /**
@@ -29,6 +32,9 @@ class UserCreated extends Event implements IEvent
         $this->payload = $payload;
     }
 
+    /**
+     * @return UuidInterface
+     */
     public function getAggregateId()
     {
         return $this->aggregateId;

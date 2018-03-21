@@ -24,7 +24,7 @@ class CommandFactory
     /**
      * @param string $command
      * @param iterable $payload
-     * @return ICommand
+     * @return CommandContract
      */
     public function make(string $command, iterable $payload)
     {

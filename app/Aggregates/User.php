@@ -69,6 +69,10 @@ class User extends AggregateRoot implements EventSourceContract
     public function createUser(UuidInterface $uuid, string $name, string $email, string $password)
     {
         // TODO: Domain validation here
+        /**
+         * EX: Query state for email existence, if exists:
+         * UserExceptionFactory::emailExists($email);
+         */
 
         $this->aggregateId = $uuid;
         $this->name = $name;

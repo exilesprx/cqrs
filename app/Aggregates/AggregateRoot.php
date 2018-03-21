@@ -38,10 +38,10 @@ abstract class AggregateRoot
     }
 
     /**
-     * @return string
+     * @return UuidInterface
      */
     public function getAggregateId()
     {
-        return $this->aggregateId->toString();
+        return $this->aggregateId;
     }
 }

@@ -176,7 +176,11 @@ return [
         // CQRS\Providers\BroadcastServiceProvider::class,
         CQRS\Providers\EventServiceProvider::class,
         CQRS\Providers\RouteServiceProvider::class,
+        \CQRS\Providers\CommandServiceProvider::class,
 
+        /*
+         * Other 3rd party dependencies
+         */
         Jenssegers\Mongodb\MongodbServiceProvider::class
 
     ],
