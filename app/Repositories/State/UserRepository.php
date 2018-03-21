@@ -45,13 +45,13 @@ class UserRepository
     }
 
     /**
-     * @param User $user
+     * @param UuidInterface $uuid
      * @param iterable $payload
      * @return int
      */
-    public function update(User $user, iterable $payload)
+    public function update(UuidInterface $uuid, iterable $payload)
     {
-        return $this->model->where('aggregate_id', $user->getAggregateId()->toString())->update($payload);
+        return $this->model->where('aggregate_id', $uuid->toString())->update($payload);
     }
 
     /**

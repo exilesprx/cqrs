@@ -3,30 +3,32 @@
 namespace tests\Unit\CQRS\Listeners;
 
 use CQRS\Aggregates\User as Aggregate;
+use CQRS\Broadcasts\BroadcastFactory;
 use CQRS\Broadcasts\BroadcastUserCreated;
 use CQRS\Commands\CreateUser;
-use CQRS\Entities\User;
-use CQRS\Events\EventFactory;
-use CQRS\Events\UserCreated;
 use CQRS\Listeners\CreateUserListener;
+use CQRS\Repositories\State\UserRepository as StateRepository;
 use Faker\Factory;
 use Illuminate\Contracts\Events\Dispatcher;
 use PhpSpec\ObjectBehavior;
-use Prophecy\Argument;
-use Ramsey\Uuid\UuidInterface;
+use Ramsey\Uuid\UuidFactory;
 
 class CreateUserListenerSpec extends ObjectBehavior
 {
     private $faker;
 
+    private $uuid;
+
     public function __construct()
     {
+        $this->uuid = new UuidFactory();
+
         $this->faker = Factory::create();
     }
 
-    public function let(EventFactory $factory, Dispatcher $dispatcher, UuidInterface $uuid, Aggregate $aggregate)
+    public function let(Dispatcher $dispatcher, Aggregate $aggregate, StateRepository $repository, BroadcastFactory $factory)
     {
-        $this->beConstructedWith($factory, $dispatcher, $uuid, $aggregate);
+        $this->beConstructedWith($dispatcher, $aggregate, $repository, $factory);
     }
 
     public function it_is_initializable()
@@ -34,36 +36,41 @@ class CreateUserListenerSpec extends ObjectBehavior
         $this->shouldHaveType(CreateUserListener::class);
     }
 
-    public function it_handles_the_user_created_command(CreateUser $command, UserCreated $event, $factory, $dispatcher, $uuid, $aggregate)
+    public function it_handles_the_user_created_command(CreateUser $command, BroadcastUserCreated $broadcast, $dispatcher, $aggregate, $repository, $factory)
     {
+        $uuid = $this->uuid->uuid4();
         $name = $this->faker->name();
         $email = $this->faker->email();
         $password = $this->faker->password();
 
+        $command->getId()->willReturn($uuid);
         $command->getName()->willReturn($name);
         $command->getEmail()->willReturn($email);
         $command->getPassword()->willReturn($password);
-        $command->toArray()->willReturn([1]);
+        $command->toArray()->willReturn([]);
 
-        $aggregate->create(
+        $aggregate->createUser(
             $uuid,
             $name,
             $email,
             $password
         )->shouldBeCalled()
-            ->willReturn(new User());
+            ->willReturn();
 
-        $factory->make(
-            UserCreated::class,
-            $uuid,
-            [1]
-        )->shouldBeCalled()
-            ->willReturn($event);
-
-        $dispatcher->dispatch($event)
+        $repository->save($aggregate)
             ->shouldBeCalled();
 
-        $dispatcher->dispatch(Argument::type(BroadcastUserCreated::class))
+        $factory->make(
+            BroadcastUserCreated::class,
+            [
+                'id' => $uuid,
+                'name' => $name,
+                'email' => $email
+            ]
+        )->shouldBeCalled()
+            ->willReturn($broadcast);
+
+        $dispatcher->dispatch($broadcast)
             ->shouldBeCalled();
 
         $this->handle($command);

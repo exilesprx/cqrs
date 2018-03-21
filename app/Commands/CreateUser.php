@@ -3,6 +3,7 @@
 namespace CQRS\Commands;
 
 use Illuminate\Queue\SerializesModels;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class CreateUser
@@ -24,6 +25,14 @@ class CreateUser extends Command
     public function __construct(iterable $payload)
     {
         $this->payload = $payload;
+    }
+
+    /**
+     * @return \Ramsey\Uuid\UuidInterface
+     */
+    public function getId()
+    {
+        return Uuid::uuid4();
     }
 
     /**

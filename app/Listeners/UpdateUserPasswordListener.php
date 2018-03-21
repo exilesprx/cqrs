@@ -55,6 +55,7 @@ class UpdateUserPasswordListener implements ShouldQueue
      * @param User $aggregate
      * @param StateRepository $repo
      * @param EventRepository $eventRepo
+     * @param BroadcastFactory $factory
      */
     public function __construct(Dispatcher $dispatcher, User $aggregate, StateRepository $repo, EventRepository $eventRepo, BroadcastFactory $factory)
     {
@@ -84,7 +85,7 @@ class UpdateUserPasswordListener implements ShouldQueue
             $this->aggregate->updateUserPassword($command->getPassword());
 
             $this->repo->update(
-                $this->aggregate,
+                $this->aggregate->getAggregateId(),
                 [
                     'password' => $command->getPassword()
                 ]

@@ -2,7 +2,6 @@
 
 namespace CQRS\Aggregates;
 
-use Illuminate\Container\Container;
 use Ramsey\Uuid\UuidInterface;
 
 /**
@@ -22,19 +21,11 @@ abstract class AggregateRoot
     protected $version;
 
     /**
-     * @var Container
-     */
-    protected $container;
-
-    /**
      * AggregateRoot constructor.
-     * @param Container $container
      */
-    protected function __construct(Container $container)
+    protected function __construct()
     {
         $this->version = 1;
-
-        $this->container = $container;
     }
 
     /**

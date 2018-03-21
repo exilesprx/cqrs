@@ -20,6 +20,7 @@ class UserEventSubscriberSpec extends ObjectBehavior
     public function __construct()
     {
         $this->uid = new UuidFactory();
+
         $this->faker = Factory::create();
     }
 
@@ -44,7 +45,7 @@ class UserEventSubscriberSpec extends ObjectBehavior
             ->willReturn([4]);
 
         $userRepository->save(
-            get_class($event->getWrappedObject()),
+            UserCreated::class,
             $uuid,
             [4]
         )->shouldBeCalled();
@@ -63,7 +64,7 @@ class UserEventSubscriberSpec extends ObjectBehavior
             ->willReturn([5]);
 
         $userRepository->save(
-            get_class($event->getWrappedObject()),
+            UserPasswordUpdated::class,
             $uuid,
             [5]
         )->shouldBeCalled();

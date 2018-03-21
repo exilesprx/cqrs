@@ -1,12 +1,11 @@
 <?php
 
-
 namespace CQRS\Aggregates;
 
-
 use CQRS\Events\EventContract;
+use CQRS\Events\EventFactory;
 use CQRS\EventStores\EventStore;
-use Illuminate\Container\Container;
+use Exception;
 use Illuminate\Support\Collection;
 use Ramsey\Uuid\Uuid;
 
@@ -16,44 +15,53 @@ trait EventSourced
      * This will replay the events on the aggregate.
      * @param AggregateRoot $context
      * @param Collection $events
-     * @param Container $container
-     * @param int $version
+     * @param EventFactory $factory
      */
-    protected static function replay(AggregateRoot $context, Collection $events, Container $container, int $version)
+    protected function replay(AggregateRoot $context, Collection $events, EventFactory $factory)
     {
-        $events->each(function(EventStore $event) use($container, $context) {
+        $events->each(function(EventStore $store) use ($factory, $context) {
 
-            // $version = $event->version;
-
-            $event = $container->makeWith(
-                $event->name,
+            $event = $factory->make(
+                $store->name,
+                Uuid::fromString($store->aggregate_id),
                 [
-                    'aggregateId' => Uuid::fromString($event->aggregate_id),
-                    'payload' => $event->data
+                    'payload' => $store->data
                 ]
             );
 
-            self::apply($context, $event);
+            $method = self::getMethodName($store->name);
+
+            $this->apply($context, $event, $method);
         });
     }
 
     /**
      * @param AggregateRoot $context
      * @param EventContract $event
-     * @throws \Exception
+     * @param string $method
+     * @throws Exception
      */
-    protected static function apply(AggregateRoot $context, EventContract $event)
+    protected function apply(AggregateRoot $context, EventContract $event, string $method)
     {
-        $parts = explode('\\', get_class($event));
+        if(!method_exists($context, $method)) {
+            throw new Exception("Method not found.");
+        }
+
+        $context->$method($event);
+    }
+
+    /**
+     * @param string $class
+     * @return string
+     */
+    protected static function getMethodName(string $class)
+    {
+        $parts = explode('\\', $class);
 
         $name = array_pop($parts);
 
         $method = "on{$name}";
 
-        if(!method_exists($context, $method)) {
-            throw new \Exception();
-        }
-
-        $context->$method($event);
+        return $method;
     }
 }

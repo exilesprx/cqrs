@@ -46,6 +46,7 @@ class CreateUserListener implements ShouldQueue
      * @param Dispatcher $dispatcher
      * @param User $aggregate
      * @param StateRepository $repo
+     * @param BroadcastFactory $factory
      */
     public function __construct(Dispatcher $dispatcher, User $aggregate, StateRepository $repo, BroadcastFactory $factory)
     {
@@ -65,11 +66,9 @@ class CreateUserListener implements ShouldQueue
     {
         // TODO: Basic validation here
 
-        $id = Uuid::uuid4();
-
         try {
             $this->aggregate->createUser(
-                $id,
+                $command->getId(),
                 $command->getName(),
                 $command->getEmail(),
                 $command->getPassword()
@@ -80,13 +79,14 @@ class CreateUserListener implements ShouldQueue
             $broadcast = $this->factory->make(
                 BroadcastUserCreated::class,
                 [
-                    'id' => $id,
+                    'id' => $command->getId(),
                     'name' => $command->getName(),
                     'email' => $command->getEmail()
                 ]
             );
         }
         catch(Exception $exception) {
+
             $broadcast = $this->factory->make(
                 BroadcastUserError::class,
                 [

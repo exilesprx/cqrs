@@ -5,10 +5,8 @@ namespace CQRS\Aggregates;
 use CQRS\Events\EventFactory;
 use CQRS\Events\UserCreated;
 use CQRS\Events\UserPasswordUpdated;
-use Illuminate\Container\Container;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Collection;
-use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
 /**
@@ -48,11 +46,10 @@ class User extends AggregateRoot implements EventSourceContract
      * User constructor.
      * @param EventFactory $factory
      * @param Dispatcher $dispatcher
-     * @param Container $container
      */
-    public function __construct(EventFactory $factory, Dispatcher $dispatcher, Container $container)
+    public function __construct(EventFactory $factory, Dispatcher $dispatcher)
     {
-        parent::__construct($container);
+        parent::__construct();
 
         $this->factory = $factory;
 
@@ -115,31 +112,42 @@ class User extends AggregateRoot implements EventSourceContract
         $this->dispatcher->dispatch($event);
     }
 
-    // TODO: these methods are called based on the Event Name
-
+    /**
+     * @param UserCreated $event
+     */
     private function onUserCreated(UserCreated $event)
     {
         $this->aggregateId = $event->getAggregateId();
         $this->name = $event->getName();
         $this->email = $event->getEmail();
         $this->password = $event->getPassword();
+//        $this->version = $event->getVersion();
     }
 
 //    private function onUserNameUpdated(UserNameUpdated $event)
 //    {
 //        $this->name = $event->getName();
+//        $this->version = $event->getVersion();
 //    }
 
+    /**
+     * @param UserPasswordUpdated $event
+     */
     private function onUserPasswordUpdated(UserPasswordUpdated $event)
     {
         $this->password = $event->getPassword();
     }
 
+    /**
+     * @param UuidInterface $uuid
+     * @param Collection $events
+     * @return mixed|void
+     */
     public function replayEvents(UuidInterface $uuid, Collection $events)
     {
         $this->aggregateId = $uuid;
 
-        self::replay($this, $events, $this->container, $this->version);
+        $this->replay($this, $events, $this->factory);
     }
 
     /**

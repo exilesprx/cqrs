@@ -3,12 +3,13 @@
 namespace tests\Unit\CQRS\Listeners;
 
 use CQRS\Aggregates\User as Aggregate;
+use CQRS\Broadcasts\BroadcastFactory;
 use CQRS\Broadcasts\BroadcastUserPasswordUpdated;
 use CQRS\Commands\UpdateUserPassword;
-use CQRS\Entities\User;
-use CQRS\Events\EventFactory;
 use CQRS\Events\UserPasswordUpdated;
 use CQRS\Listeners\UpdateUserPasswordListener;
+use CQRS\Repositories\State\UserRepository as StateRepository;
+use CQRS\Repositories\Events\UserRepository as EventRepository;
 use Faker\Factory;
 use Illuminate\Events\Dispatcher;
 use PhpSpec\ObjectBehavior;
@@ -28,9 +29,9 @@ class UpdateUserPasswordListenerSpec extends ObjectBehavior
         $this->uuid = new UuidFactory();
     }
 
-    public function let(EventFactory $factory, Dispatcher $dispatcher, Aggregate $aggregate)
+    public function let(Dispatcher $dispatcher, Aggregate $aggregate, StateRepository $repository, EventRepository $eventRepo, BroadcastFactory $broadcastFactory)
     {
-        $this->beConstructedWith($factory, $dispatcher, $aggregate);
+        $this->beConstructedWith($dispatcher, $aggregate, $repository, $eventRepo, $broadcastFactory);
     }
 
     public function it_is_initializable()
@@ -38,31 +39,46 @@ class UpdateUserPasswordListenerSpec extends ObjectBehavior
         $this->shouldHaveType(UpdateUserPasswordListener::class);
     }
 
-    public function it_handles_the_user_update_password_command(UpdateUserPassword $command, UserPasswordUpdated $event, $factory, $dispatcher, $aggregate)
+    public function it_handles_the_user_update_password_command(UpdateUserPassword $command, UserPasswordUpdated $broadcast, $dispatcher, $aggregate, $repository, $eventRepo, $broadcastFactory)
     {
         $uuid = $this->uuid->uuid4();
         $password = $this->faker->password();
+        $events = collect([]);
 
         $command->getId()->willReturn($uuid);
         $command->getPassword()->willReturn($password);
-        $command->toArray()->willReturn([2]);
+        $command->toArray()->willReturn([]);
 
-        $aggregate->updatePassword($uuid, $password)
+        $eventRepo->find($uuid)
             ->shouldBeCalled()
-            ->willReturn(new User());
+            ->willReturn($events);
 
-        $factory->make(
-            UserPasswordUpdated::class,
+        $aggregate->replayEvents($uuid, $events)
+            ->shouldBeCalled();
+
+        $aggregate->updateUserPassword($password)
+            ->shouldBeCalled();
+
+        $aggregate->getAggregateId()
+            ->shouldBeCalled()
+            ->willReturn($uuid);
+
+        $repository->update(
             $uuid,
-            [2]
-        )->shouldBeCalled()
-            ->willReturn($event);
-
-        $dispatcher->dispatch($event)
+            [
+                'password' => $password
+            ]
+        )
             ->shouldBeCalled();
 
-        $dispatcher->dispatch(Argument::type(BroadcastUserPasswordUpdated::class))
-            ->shouldBeCalled();
+        $broadcastFactory->make(
+            BroadcastUserPasswordUpdated::class,
+            [
+                'id' => $uuid
+            ]
+        )
+            ->shouldBeCalled()
+            ->willReturn($broadcast);
 
         $this->handle($command);
     }
