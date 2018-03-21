@@ -28,26 +28,27 @@ jobs:
           command: "sudo apt-get install -y autoconf pkg-config libssl-dev"
 
       - run:
-          name: Php MongoDB
+          name: Install mongoDB
           command: "sudo pecl install mongodb"
 
       - run:
-          name: Enable mongodb docker extension
-          command: "sudo docker-php-ext-enable mongodb"
-
-      - run:
-          name: Php mbstring
-          command: "sudo docker-php-ext-install mbstring"
-      - run:
-          name: Installing XML dependencies
+          name: Install libxml
           command: "sudo apt-get install libxml2-dev"
 
       - run:
-          name: Php xml
+          name: Enable docker php extension mongodb
+          command: "sudo docker-php-ext-enable mongodb"
+
+      - run:
+          name: Enable docker php extension mbstring
+          command: "sudo docker-php-ext-install mbstring"
+
+      - run:
+          name: Enable docker php extension xml
           command: "sudo docker-php-ext-install xml"
 
       - run:
-          name: Php pcntl
+          name: Enable docker php extension pcntl
           command: "sudo docker-php-ext-install pcntl"
 
       # Download and cache dependencies
